@@ -1,11 +1,26 @@
 import tkinter
+from tkinter.constants import TRUE
 import tkinter.messagebox as messagebox
 import mysql.connector
 import re
 from setup import init_mysql
     
-def CommonSignUpPage():
-    #common attributes: userId, password
+def LandingPage(root):
+    main_screen = root   
+    main_screen.title("OSHES app")
+    main_screen.config(bg='#0B5A81') 
+    main_screen.grid()
+ 
+    tkinter.Label(text="Welcome to OSHES :)", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Customer Registration", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("registerCustomer")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("loginCustomer")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Admin Registration", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack()
+    
     return 
 
 def AdminSignUpPage(): 
@@ -13,9 +28,7 @@ def AdminSignUpPage():
     ##attributes: adminId, name, gender, phone, password 
     return 
 
-def CustomerSignUpPage(cursor, db):
-    #sign up as a customer 
-    ##attributes: customerId, name, gender, email, phone, address, password 
+def CustomerSignUpPage(root, cursor, db):
     def validate_signup():
         check_counter=0
         warn = ""
@@ -80,14 +93,14 @@ def CustomerSignUpPage(cursor, db):
             try:
                 cursor.execute(insert_statement,(register_name.get(), register_pwd.get(), register_mobile.get(), var.get(), register_address.get(), register_email.get()))
                 db.commit()
-                messagebox.showinfo('Confirmation', 'You have successfully registered!')
+                messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as a Customer!')
             except Exception as e:
                 messagebox.showerror('', e)
         else:
             messagebox.showerror('Error', warn)
 
-    ws = tkinter.Tk()
-    ws.title('User Registration')
+    ws = root
+    ws.title('Customer Registration')
     ws.config(bg='#0B5A81')
     f = ('Times', 14)
     var = tkinter.StringVar()
@@ -230,6 +243,7 @@ def CustomerSignUpPage(cursor, db):
         command=validate_signup
     )
 
+    tkinter.Label(text="Welcome New Customer! :)", width="300", height="2", font=("Calibri", 13)).pack()
     register_name.grid(row=0, column=1, pady=10, padx=20)
     register_email.grid(row=1, column=1, pady=10, padx=20) 
     register_mobile.grid(row=2, column=1, pady=10, padx=20)
@@ -242,36 +256,111 @@ def CustomerSignUpPage(cursor, db):
     male_rb.pack(expand=True, side=tkinter.LEFT)
     female_rb.pack(expand=True, side=tkinter.LEFT)
     others_rb.pack(expand=True, side=tkinter.LEFT)
-
-    ws.mainloop()
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.LEFT)
     return 
 
-def LoginPage():
-    login_screen = tkinter.Tk()
-    login_screen.title("Login")
-    login_screen.geometry("300x250")
-    tkinter.Label(login_screen, text="Please enter login details").pack()
-    tkinter.Label(login_screen, text="").pack()
-    tkinter.Label(login_screen, text="user ID").pack()
-    username_login_entry = tkinter.Entry(login_screen, textvariable="username")
-    username_login_entry.pack()
-    tkinter.Label(login_screen, text="").pack()
-    tkinter.Label(login_screen, text="password").pack()
-    password__login_entry = tkinter.Entry(login_screen, textvariable="password", show= '*')
-    password__login_entry.pack()
-    tkinter.Label(login_screen, text="").pack()
-    tkinter.Button(login_screen, text="Login", width=10, height=1).pack()
-    login_screen.mainloop()
+def CustomerLoginPage(root, cursor):
+    def validate_login():
+        check_counter=0
+        warn = ""
+        if email_tf.get() == "":
+            warn += "\n"
+            warn += "Please enter an email!"
+        else:
+            check_counter += 1
+        if pwd_tf.get() == "":
+            warn += "\n"
+            warn += "Please enter a password!"
+        else:
+            check_counter += 1
+        
+        selection_statement = "SELECT customerID, name, email, password FROM Customer WHERE email = %s AND password = %s"
+        
+        if check_counter == 2:
+            try:
+                cursor.execute(selection_statement,(email_tf.get(), pwd_tf.get()))
+                row = cursor.fetchone()
+                if row == None:
+                    messagebox.showinfo('Error', 'Invalid Email and/or Password')
+                else:
+                    customerID = row[0]
+                    customerName = row[1]
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !")
+                    cursor.reset()
+            except Exception as e:
+                messagebox.showerror('Error', e)
+        else:
+            messagebox.showerror('Error', warn)
 
-def create_db_mysql():
-    mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root"
-)
-    mycursor = mydb.cursor()
-    mycursor.execute("CREATE DATABASE oshes")
-    mydb.close()
+    ws = root
+    ws.title('Customer Login')
+    ws.config(bg='#0B5A81')
+
+    f = ('Times', 14)
+
+    left_frame = tkinter.Frame(
+        ws, 
+        bd=2, 
+        bg='#CCCCCC',   
+        relief=tkinter.SOLID, 
+        padx=10, 
+        pady=10
+        )
+
+    tkinter.Label(
+        left_frame, 
+        text="Enter your Email", 
+        bg='#CCCCCC',
+        font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        left_frame, 
+        text="Enter your Password", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=1, column=0, pady=10)
+
+    email_tf = tkinter.Entry(
+        left_frame, 
+        font=f
+        )
+    pwd_tf = tkinter.Entry(
+        left_frame, 
+        font=f,
+        show='*'
+        )
+    login_btn = tkinter.Button(
+        left_frame, 
+        width=15, 
+        text='Login', 
+        font=f, 
+        relief=tkinter.SOLID,
+        cursor='hand2',
+        command=validate_login
+        )
+
+    tkinter.Label(text="Welcome existing customer! :)", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    email_tf.grid(row=0, column=1, pady=10, padx=20)
+    pwd_tf.grid(row=1, column=1, pady=10, padx=20)
+    login_btn.grid(row=2, column=1, pady=10, padx=20)
+    left_frame.pack()
+    return 
+
+def changepage(other):
+    global currpage, root
+    for widget in root.winfo_children():
+        widget.destroy()
+    if currpage == "landing" and other == "registerCustomer":
+        CustomerSignUpPage(root, mycursor, mydb)
+        currpage = "registerCustomer"
+    elif currpage == "landing" and other == "loginCustomer":
+        CustomerLoginPage(root, mycursor)
+        currpage = "loginCustomer"
+    elif currpage == "registerCustomer" and other == "landing":
+        LandingPage(root)
+        currpage = "landing"
+
 
 mydb = mysql.connector.connect(
     host="localhost",
@@ -279,7 +368,13 @@ mydb = mysql.connector.connect(
     password="root",
     database="oshes"
     )
-mycursor = mydb.cursor()
+mycursor = mydb.cursor(buffered=True)
 
 #init_mysql()
-CustomerSignUpPage(mycursor, mydb)
+
+currpage = "landing"
+root = tkinter.Tk() 
+root.wm_geometry("500x500")
+LandingPage(root)
+root.mainloop()
+

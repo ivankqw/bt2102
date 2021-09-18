@@ -1,8 +1,19 @@
+import mysql.connector
 from pymongo import MongoClient
 from pymongo import TEXT
 import json
 import pandas as pd
 from sqlalchemy import create_engine
+
+def create_db_mysql():
+    mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="root"
+)
+    mycursor = mydb.cursor()
+    mycursor.execute("CREATE DATABASE oshes")
+    mydb.close()
 
 def init_mongo():
     client = MongoClient()
@@ -44,7 +55,7 @@ def init_mysql():
     
     mycursor.execute("CREATE TABLE Administrator (adminID INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), password VARCHAR(255), phoneNumber VARCHAR(255), gender VARCHAR(255))")
     mycursor.execute("CREATE TABLE Customer (customerID INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), password VARCHAR(255), phoneNumber VARCHAR(255), gender VARCHAR(255), address VARCHAR(255), email VARCHAR(255))")
-    mycursor.execute("CREATE TABLE Item (itemID INT AUTO_INCREMENT PRIMARY KEY, adminID INT, purchaseStatus VARCHAR(255), serviceStatus VARCHAR(255))")
+    mycursor.execute("CREATE TABLE Item (itemID INT PRIMARY KEY, adminID INT, purchaseStatus VARCHAR(255), serviceStatus VARCHAR(255))")
     mycursor.execute("CREATE TABLE Payment (paymentID INT AUTO_INCREMENT PRIMARY KEY, customerID INT, requestID INT, paymentDate DATE)")
     mycursor.execute("CREATE TABLE Request (requestID INT AUTO_INCREMENT PRIMARY KEY, customerID INT, adminID INT, itemID INT, requestDate DATE, requestStatus VARCHAR(255))")
     mycursor.execute("CREATE TABLE ServiceFee (requestID INT PRIMARY KEY, creationDate DATE, feeAmount DOUBLE)")
