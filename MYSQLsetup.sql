@@ -65,9 +65,3 @@ CREATE TABLE ServiceFee(
     feeAmount       DECIMAL(10,2)   NOT NULL	CHECK (feeAmount >= 0),
     FOREIGN KEY (requestID) REFERENCES Request(requestID)
 );
-
-INSERT INTO Administrator (
-    addressasdf
-    addressfasdf
-
-)
