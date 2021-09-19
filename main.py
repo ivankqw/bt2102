@@ -361,13 +361,28 @@ def changepage(other):
         LandingPage(root)
         currpage = "landing"
 
+def executeSQL(SQLFileName, cursor):    
+    with open(SQLFileName, 'r') as SQLscript:
+        SQLcommands = SQLscript.read().split(';')
+        for command in SQLcommands:
+            try:
+                cursor.execute(command)
+            except:
+                print('Statement not executed: ' + str(command))
 
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="root",
-    database="oshes"
-    )
+def mysqlSelect(command, cursor):
+    # Select
+    cursor.execute(command)
+    result = cursor.fetchall()
+    return result
+
+
+MYSQL_HOST = "localhost"
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_DATABASE = ""
+
+mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
 #init_mysql()
@@ -377,4 +392,3 @@ root = tkinter.Tk()
 root.wm_geometry("500x500")
 LandingPage(root)
 root.mainloop()
-
