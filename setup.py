@@ -60,4 +60,4 @@ def items_info_to_sql(password):
 
 
 
-# create_db_mysql(password='password')
+#create_db_mysql(password='s9938580d')

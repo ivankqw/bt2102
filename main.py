@@ -379,16 +379,16 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9938580d" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
-#init_mysql()
+init_mysql()
 
 currpage = "landing"
-root = tkinter.Tk() 
-root.wm_geometry("500x500")
-LandingPage(root)
-root.mainloop()
+#root = tkinter.Tk() 
+#root.wm_geometry("500x500")
+#LandingPage(root)
+#root.mainloop()
