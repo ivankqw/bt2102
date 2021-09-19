@@ -11,7 +11,7 @@ CREATE TABLE Administrator(
     adminName 		VARCHAR(255)	NOT NULL,
     adminPassword	VARCHAR(255) 	NOT NULL,
     phoneNumber		VARCHAR(20) 	NOT NULL,
-    gender			CHAR			NOT NULL    CHECK (gender IN ('M','F')),
+    gender			VARCHAR(20)		NOT NULL,
     PRIMARY KEY (adminID)
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE Customer(
     custName 		VARCHAR(255)	NOT NULL,
     custPassword	VARCHAR(255) 	NOT NULL,
     phoneNumber		VARCHAR(20) 	NOT NULL,
-    gender			CHAR			NOT NULL	CHECK (gender IN ('M','F')),
+    gender			VARCHAR(20)		NOT NULL,
     address			VARCHAR(255) 	NOT NULL,
     email			VARCHAR(255) 	NOT NULL,
     PRIMARY KEY (custID)
@@ -66,3 +66,8 @@ CREATE TABLE ServiceFee(
     FOREIGN KEY (requestID) REFERENCES Request(requestID)
 );
 
+INSERT INTO Administrator (
+    addressasdf
+    addressfasdf
+
+)

@@ -33,7 +33,7 @@ def CustomerSignUpPage(root, cursor, db):
         check_counter=0
         warn = ""
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        insert_statement = "INSERT INTO Customer (name, password, phoneNumber, gender, address, email) VALUES (%s, %s, %s, %s, %s, %s)"
+        insert_statement = "INSERT INTO Customer (custName, custPassword, phoneNumber, gender, address, email) VALUES (%s, %s, %s, %s, %s, %s)"
         if register_name.get() == "":
             warn += "\n"
             warn += "Name cannot be empty!"
@@ -379,7 +379,7 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
