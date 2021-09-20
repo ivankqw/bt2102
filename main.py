@@ -4,6 +4,7 @@ import tkinter.messagebox as messagebox
 import mysql.connector
 import re
 from setup import init_mysql
+from pymongo import MongoClient
     
 def LandingPage(root):
     main_screen = root   
@@ -347,6 +348,57 @@ def CustomerLoginPage(root, cursor):
     left_frame.pack()
     return 
 
+def buysearchpage(root, cursor, currCustomerID):
+    ws = root
+    ws.title('Buy/Search product')
+    ws.config(bg='#0B5A81')
+
+    def buy_item(itemid):
+        check_counter=0
+        warn = ""
+        if itemid.get() == "":
+            warn += "\n"
+            warn += "Please enter an itemID!"
+        else:
+            check_counter += 1
+        
+        if check_counter == 1:
+            try:
+                client = MongoClient('localhost', 27017)
+                inventory = client['Inventory']
+                cursor = inventory.items.find({itemID = 'itemid'})
+                if cursor == None:
+                    messagebox.showinfo('Error', 'Invalid itemID')
+                else:
+                    messagebox.showinfo("Item bought: " + cursor.model + "!")
+            except Exception as e:
+                messagebox.showerror('Error', e)
+        else:
+            messagebox.showerror('Error', warn)
+
+    tkinter.Button(text="Search for an item", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("registerCustomer")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Label(text="Key in item ID here and click buy to purchase", width="300", height="2", font=("Calibri", 13)).pack()
+    ##for buy entry
+    tkinter.Label(
+        left_frame, 
+        text="Enter item ID here", 
+        bg='#CCCCCC',
+        font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
+        )
+    itemid = tkinter.Entry(
+        left_frame, 
+        font=f
+    )
+    tkinter.Button(text="Buy", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("loginCustomer")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+
+    client = MongoClient('localhost', 27017)
+    inventory = client['Inventory']
+    cursor = 
+
+
+##HELPER FUNCTIONS
 def changepage(other):
     global currpage, root
     for widget in root.winfo_children():
