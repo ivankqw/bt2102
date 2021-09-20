@@ -6,12 +6,14 @@ import json
 import pandas as pd
 from sqlalchemy import create_engine
 
+# Create MYSQL Database
 def create_db_mysql(host='localhost',user='root',password=''):
     mydb = mysql.connector.connect(host=host,user=user,passwd=password)
     mycursor = mydb.cursor()
     mycursor.execute("CREATE DATABASE oshes")
     mydb.close()
 
+# Create MongoDB Database
 def init_mongo():
     client = MongoClient()
     mongo = client['Inventory']
@@ -35,6 +37,7 @@ def create_indexes_mongo():
     items.create_index([("Category", TEXT), ("Model", TEXT)])
     return
 
+# MYSQL Schema
 def init_mysql(host='localhost',user='root',password=''):
     mydb = mysql.connector.connect(host=host,user=user,passwd=password,database="oshes")
     mycursor = mydb.cursor()
@@ -42,15 +45,27 @@ def init_mysql(host='localhost',user='root',password=''):
     with open('MYSQLSetup.sql', 'r') as SQLscript:
         SQLcommands = SQLscript.read().split(';')
         for command in SQLcommands:
-            try:
-                mycursor.execute(command)
-            except:
-                pass
+            mycursor.execute(command)
+            
     mydb.close()
 
+# Items.json info to MYSQL, while taking ProductID from products.json
 def items_info_to_sql(password):
+    # def getProductIdOfItem(category, model):
+    #     client = MongoClient()
+    #     mongo = client['Inventory']
+    #     products = mongo.products
+    #     return list(products.find({'Category': category, 'Model' : model}))[0]['ProductID']
+    def getProductID(category, model):
+        p = open('products.json')
+        p = json.load(p)
+        for i in p:
+            if i['Category'] == category and i['Model'] == model:
+                return i['ProductID']
     items_df = pd.read_json('items.json')
-    items_sql_df = items_df[["ItemID", "PurchaseStatus", "ServiceStatus"]]
+    items_df['productID'] = items_df.apply(lambda row : getProductID(row.Category, row.Model), axis=1)
+    items_sql_df = items_df[["ItemID", "PurchaseStatus", "ServiceStatus", "productID"]]
+    
     engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
                         .format(user="root",
                                 pw=password,
@@ -58,6 +73,16 @@ def items_info_to_sql(password):
 
     items_sql_df.to_sql('item', con = engine, if_exists='append', index=False)
 
+# products.json info to MYSQL
+def products_info_to_sql(password):
+    products_df = pd.read_json('products.json')
+    products_sql_df = products_df[["ProductID", "Warranty (months)"]]
+    products_sql_df.rename({"Warranty (months)": 'warrantyDuration'}, axis=1, inplace=True)
+    engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
+                        .format(user="root",
+                                pw=password,
+                                db="oshes"))
 
+    products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
 
 # create_db_mysql(password='password')
