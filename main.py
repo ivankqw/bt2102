@@ -33,7 +33,7 @@ def CustomerSignUpPage(root, cursor, db):
         check_counter=0
         warn = ""
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-        insert_statement = "INSERT INTO Customer (custName, custPassword, phoneNumber, gender, address, email) VALUES (%s, %s, %s, %s, %s, %s)"
+        insert_statement = "INSERT INTO Customer (customerName, customerPassword, phoneNumber, gender, address, email) VALUES (%s, %s, %s, %s, %s, %s)"
         if register_name.get() == "":
             warn += "\n"
             warn += "Name cannot be empty!"
@@ -274,7 +274,7 @@ def CustomerLoginPage(root, cursor):
         else:
             check_counter += 1
         
-        selection_statement = "SELECT customerID, name, email, password FROM Customer WHERE email = %s AND password = %s"
+        selection_statement = "SELECT customerID, customerName, email, customerPassword FROM Customer WHERE email = %s AND customerPassword = %s"
         
         if check_counter == 2:
             try:
