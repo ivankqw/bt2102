@@ -17,15 +17,219 @@ def LandingPage(root):
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("loginCustomer")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    tkinter.Button(text="Admin Registration", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack()
+    tkinter.Button(text="Admin Registration", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("registerAdmin")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack()
+    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack()
     
     return 
 
-def AdminSignUpPage(): 
-    #sign up as an admin 
-    ##attributes: adminId, name, gender, phone, password 
+def AdminSignUpPage(root, cursor, db): 
+    def validate_signup_admin():
+        check_counter=0
+        warn = ""
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        insert_statement = "INSERT INTO Administrator (adminName, gender, phoneNumber, adminPassword) VALUES (%s, %s, %s, %s)"
+        if register_name.get() == "":
+            warn += "\n"
+            warn += "Name cannot be empty!"
+        else:
+            check_counter += 1
+
+        if register_email.get() == "":
+            warn += "\n"
+            warn += "Email cannot be empty!"
+        else:
+            check_counter += 1
+        if (not re.fullmatch(regex, register_email.get())):
+            warn += "\n"
+            warn += "Please enter a valid email address!"
+        else:
+            check_counter += 1
+        if register_mobile.get() == "":
+            warn += "\n"
+            warn += "Phone number cannot be empty!"
+        else:
+            check_counter += 1
+        if ((len(register_mobile.get()) != 8) or (not register_mobile.get().isdigit())):
+            print(len(register_mobile.get()))
+            warn += "\n"
+            warn += "Please enter a valid mobile number! (8 digits)"
+        else:
+            check_counter += 1  
+        if  var.get() == "":
+            warn += "\n"        
+            warn += "Select Gender"
+        else:
+            check_counter += 1
+
+        if register_pwd.get() == "":
+            warn += "\n"
+            warn += "Password cannot be empty!"
+        else:
+            check_counter += 1
+
+        if pwd_again.get() == "":
+            warn += "\n"
+            warn += "Re-enter password cannot be empty!"
+        else:
+            check_counter += 1
+        if pwd_again.get() != register_pwd.get():
+            warn += "\n"
+            warn += "Passwords not matching!"
+        else:
+            check_counter += 1
+        if check_counter == 9:
+            try:
+                cursor.execute(insert_statement,(register_name.get(), var.get(), register_mobile.get(), register_pwd.get()))
+                db.commit()
+                messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as an Administrator!')
+            except Exception as e:
+                messagebox.showerror('', e)
+        else:
+            messagebox.showerror('Error', warn)
+
+    ws = root
+    ws.title('Administrator Registration')
+    ws.config(bg='red')
+    f = ('Times', 14)
+    var = tkinter.StringVar()
+    var.set('Male')
+
+    right_frame = tkinter.Frame(
+        ws, 
+        bd=2, 
+        bg='#CCCCCC',
+        relief=tkinter.SOLID, 
+        padx=10, 
+        pady=10
+        )
+
+    tkinter.Label(
+        right_frame, 
+        text="Enter Name", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=0, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        right_frame, 
+        text="Enter Email", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=1, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        right_frame, 
+        text="Phone Number", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=2, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        right_frame, 
+        text="Select Gender", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=3, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        right_frame, 
+        text="Enter Password", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=4, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        right_frame, 
+        text="Re-Enter Password", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=5, column=0, sticky=tkinter.W, pady=10)
+
+    gender_frame = tkinter.LabelFrame(
+        right_frame,
+        bg='#CCCCCC',
+        padx=10, 
+        pady=10,
+        )
+
+    register_name = tkinter.Entry(
+        right_frame, 
+        font=f
+        )
+
+    register_email = tkinter.Entry(
+        right_frame, 
+        font=f
+        )
+
+    register_mobile = tkinter.Entry(
+        right_frame, 
+        font=f
+        )
+
+    male_rb = tkinter.Radiobutton(
+        gender_frame, 
+        text='Male',
+        bg='#CCCCCC',
+        variable=var,
+        value='Male',
+        font=('Times', 10),
+    )
+
+    female_rb = tkinter.Radiobutton(
+        gender_frame,
+        text='Female',
+        bg='#CCCCCC',
+        variable=var,
+        value='Female',
+        font=('Times', 10),
+    )
+
+    others_rb = tkinter.Radiobutton(
+        gender_frame,
+        text='Other',
+        bg='#CCCCCC',
+        variable=var,
+        value='Other',
+        font=('Times', 10)
+    )
+
+    register_pwd = tkinter.Entry(
+        right_frame, 
+        font=f,
+        show='*'
+    )
+    pwd_again = tkinter.Entry(
+        right_frame, 
+        font=f,
+        show='*'
+    )
+
+    register_btn = tkinter.Button(
+        right_frame, 
+        width=15, 
+        text='Register', 
+        font=f, 
+        relief=tkinter.SOLID,
+        cursor='hand2',
+        command=validate_signup_admin
+    )
+
+    tkinter.Label(text="Welcome New Admin! :)", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(text="", bg='red').pack()
+    register_name.grid(row=0, column=1, pady=10, padx=20)
+    register_email.grid(row=1, column=1, pady=10, padx=20) 
+    register_mobile.grid(row=2, column=1, pady=10, padx=20)
+    register_pwd.grid(row=4, column=1, pady=10, padx=20)
+    pwd_again.grid(row=5, column=1, pady=10, padx=20)
+    register_btn.grid(row=6, column=1, pady=10, padx=20)
+    right_frame.pack()
+    gender_frame.grid(row=3, column=1, pady=10, padx=20)
+    male_rb.pack(expand=True, side=tkinter.LEFT)
+    female_rb.pack(expand=True, side=tkinter.LEFT)
+    others_rb.pack(expand=True, side=tkinter.LEFT)
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
 def CustomerSignUpPage(root, cursor, db):
@@ -244,6 +448,7 @@ def CustomerSignUpPage(root, cursor, db):
     )
 
     tkinter.Label(text="Welcome New Customer! :)", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()
     register_name.grid(row=0, column=1, pady=10, padx=20)
     register_email.grid(row=1, column=1, pady=10, padx=20) 
     register_mobile.grid(row=2, column=1, pady=10, padx=20)
@@ -256,7 +461,7 @@ def CustomerSignUpPage(root, cursor, db):
     male_rb.pack(expand=True, side=tkinter.LEFT)
     female_rb.pack(expand=True, side=tkinter.LEFT)
     others_rb.pack(expand=True, side=tkinter.LEFT)
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.LEFT)
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
 def CustomerLoginPage(root, cursor):
@@ -345,19 +550,115 @@ def CustomerLoginPage(root, cursor):
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
     left_frame.pack()
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+    return 
+
+def AdminLoginPage(root, cursor):
+    def validate_login_a():
+        check_counter=0
+        warn = ""
+        if phone_tf.get() == "":
+            warn += "\n"
+            warn += "Please enter a phone number!"
+        else:
+            check_counter += 1
+        if pwd_tf.get() == "":
+            warn += "\n"
+            warn += "Please enter a password!"
+        else:
+            check_counter += 1
+        
+        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE phoneNumber = %s AND adminPassword = %s"
+        
+        if check_counter == 2:
+            try:
+                cursor.execute(selection_statement,(phone_tf.get(), pwd_tf.get()))
+                row = cursor.fetchone()
+                if row == None:
+                    messagebox.showinfo('Error', 'Invalid Phone Number and/or Password')
+                else:
+                    adminID = row[0]
+                    adminName = row[1]
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !")
+                    cursor.reset()
+            except Exception as e:
+                messagebox.showerror('Error', e)
+        else:
+            messagebox.showerror('Error', warn)
+
+    ws = root
+    ws.title('Administrator Login')
+    ws.config(bg='red')
+
+    f = ('Times', 14)
+
+    left_frame = tkinter.Frame(
+        ws, 
+        bd=2, 
+        bg='#CCCCCC',   
+        relief=tkinter.SOLID, 
+        padx=10, 
+        pady=10
+        )
+
+    tkinter.Label(
+        left_frame, 
+        text="Enter your Phone Number", 
+        bg='#CCCCCC',
+        font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
+
+    tkinter.Label(
+        left_frame, 
+        text="Enter your Password", 
+        bg='#CCCCCC',
+        font=f
+        ).grid(row=1, column=0, pady=10)
+
+    phone_tf = tkinter.Entry(
+        left_frame, 
+        font=f
+        )
+    pwd_tf = tkinter.Entry(
+        left_frame, 
+        font=f,
+        show='*'
+        )
+    login_btn = tkinter.Button(
+        left_frame, 
+        width=15, 
+        text='Login', 
+        font=f, 
+        relief=tkinter.SOLID,
+        cursor='hand2',
+        command=validate_login_a
+        )
+
+    tkinter.Label(text="Welcome existing Administrator! :)", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(text="", bg='red').pack()
+    phone_tf.grid(row=0, column=1, pady=10, padx=20)
+    pwd_tf.grid(row=1, column=1, pady=10, padx=20)
+    login_btn.grid(row=2, column=1, pady=10, padx=20)
+    left_frame.pack()
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
 def changepage(other):
     global currpage, root
     for widget in root.winfo_children():
         widget.destroy()
-    if currpage == "landing" and other == "registerCustomer":
+    if other == "registerCustomer":
         CustomerSignUpPage(root, mycursor, mydb)
         currpage = "registerCustomer"
-    elif currpage == "landing" and other == "loginCustomer":
+    elif other == "registerAdmin":
+        AdminSignUpPage(root, mycursor, mydb)
+        currpage = "registerAdmin"
+    elif other == "loginCustomer":
         CustomerLoginPage(root, mycursor)
         currpage = "loginCustomer"
-    elif currpage == "registerCustomer" and other == "landing":
+    elif other == "loginAdmin":
+        AdminLoginPage(root, mycursor)
+        currpage = "loginAdmin"
+    elif other == "landing":
         LandingPage(root)
         currpage = "landing"
 
@@ -379,7 +680,7 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
@@ -389,6 +690,6 @@ mycursor = mydb.cursor(buffered=True)
 
 currpage = "landing"
 root = tkinter.Tk() 
-root.wm_geometry("500x500")
+root.wm_geometry("600x600")
 LandingPage(root)
 root.mainloop()
