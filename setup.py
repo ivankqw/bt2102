@@ -86,11 +86,8 @@ def products_info_to_sql(password):
     products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
 
 # create_db_mysql(password='password')
-<<<<<<< Updated upstream
-=======
 init_mysql()
 items_info_to_sql("s9935327i")
 products_info_to_sql("s9935327i")
 
 
->>>>>>> Stashed changes
