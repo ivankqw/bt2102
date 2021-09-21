@@ -5,6 +5,9 @@ import mysql.connector
 import re
 from setup import init_mysql
 from pymongo import MongoClient
+
+client = MongoClient('localhost', 27017)
+inventory = client['Inventory']
     
 def LandingPage(root):
     main_screen = root   
@@ -348,27 +351,27 @@ def CustomerLoginPage(root, cursor):
     left_frame.pack()
     return 
 
-def buysearchpage(root, cursor, currCustomerID):
-    ws = root
-    ws.title('Buy/Search product')
-    ws.config(bg='#0B5A81')
-
-    def buy_item(itemid):
+def buySearchPage(root, cursor, currCustomerID):
+    def getAndUpdateItem(productid):    
+        ##access mysql db and check for stock, update item to be sold, should return boolean
+        return
+    
+    def buy_item(productid):
         check_counter=0
         warn = ""
         if itemid.get() == "":
             warn += "\n"
-            warn += "Please enter an itemID!"
+            warn += "Please enter a product ID!"
         else:
             check_counter += 1
         
         if check_counter == 1:
             try:
-                client = MongoClient('localhost', 27017)
-                inventory = client['Inventory']
-                cursor = inventory.items.find({itemID = 'itemid'})
+                cursor = inventory.products.find({'productID' : productid})
                 if cursor == None:
                     messagebox.showinfo('Error', 'Invalid itemID')
+                elif getAndUpdateItem(productid):
+                    messagebox.showinfo('Ran out of stock! Try again next time.')
                 else:
                     messagebox.showinfo("Item bought: " + cursor.model + "!")
             except Exception as e:
@@ -376,26 +379,33 @@ def buysearchpage(root, cursor, currCustomerID):
         else:
             messagebox.showerror('Error', warn)
 
-    tkinter.Button(text="Search for an item", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("registerCustomer")).pack()
+    ws = root
+    ws.title('Buy/Search product')
+    ws.config(bg='#0B5A81')
+    tkinter.Button(text="Category search", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("simpleSearchPage")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Filter search", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("filterSearchPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Label(text="Key in item ID here and click buy to purchase", width="300", height="2", font=("Calibri", 13)).pack()
     ##for buy entry
-    tkinter.Label(
-        left_frame, 
-        text="Enter item ID here", 
-        bg='#CCCCCC',
-        font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
-        )
-    itemid = tkinter.Entry(
-        left_frame, 
-        font=f
-    )
-    tkinter.Button(text="Buy", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("loginCustomer")).pack()
+    tkinter.Label(text="Enter item ID here", bg='#CCCCCC', font=f.grid(row=0, column=0, sticky=tkinter.W, pady=10)).pack()
+    itemid = tkinter.Entry(font=f).pack()
+    tkinter.Button(text="Buy", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("buyCompletedPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
+    itemid.grid(row=0, column=1, pady=10, padx=20)
+    return
 
-    client = MongoClient('localhost', 27017)
-    inventory = client['Inventory']
-    cursor = 
+def simpleSearchPage(root, cursor):
+    ws = root
+    ws.title('Choose a category!')
+    ws.config(bg='#0B5A81')
+    tkinter.Button(text="Lights", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("lightsPage")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Locks", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("locksPage")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    return
+
+def lightsPage(root, cursor):
 
 
 ##HELPER FUNCTIONS
@@ -431,7 +441,7 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Cf66486648" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
