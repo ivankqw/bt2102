@@ -550,8 +550,7 @@ def CustomerLoginPage(root, cursor):
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
     left_frame.pack()
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("customerHomePage")).pack(side=tkinter.BOTTOM)
-    #Changed "landing" to "customerHomePage"
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
 def AdminLoginPage(root, cursor):
@@ -640,8 +639,7 @@ def AdminLoginPage(root, cursor):
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
     left_frame.pack()
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
-    #changed "landing" to "adminHomePage"
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
 def AdminHomePage(root, cursor): 
@@ -726,7 +724,7 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9938580d" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
