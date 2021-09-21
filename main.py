@@ -550,7 +550,8 @@ def CustomerLoginPage(root, cursor):
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
     left_frame.pack()
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("customerHomePage")).pack(side=tkinter.BOTTOM)
+    #Changed "landing" to "customerHomePage"
     return 
 
 def AdminLoginPage(root, cursor):
@@ -639,8 +640,46 @@ def AdminLoginPage(root, cursor):
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
     left_frame.pack()
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
+    #changed "landing" to "adminHomePage"
     return 
+
+def AdminHomePage(root, cursor): 
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+     
+    tkinter.Label(text="Welcome to Admin's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("inventoryHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("serviceStatusesHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("unpaidHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("approveHomePage")).pack() 
+ 
+    return 
+ 
+def CustomerHomePage(root, cursor): 
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+     
+    tkinter.Label(text="Welcome to Customer's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("buyItemsHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("requestServiceHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("payServiceHomePage")).pack()
+
+    return 
+
+#need to work on this, which filters out requests that already have its service fees paid
+#def ApproveHomePage(root, cursor)
 
 def changepage(other):
     global currpage, root
@@ -661,6 +700,13 @@ def changepage(other):
     elif other == "landing":
         LandingPage(root)
         currpage = "landing"
+    elif other == "customerHomePage":
+        CustomerHomePage(root, mycursor)
+        currpage = "customerHomePage"
+    elif other == "adminHomePage":
+        AdminHomePage(root, mycursor)
+        currpage = "adminHomePage"
+
 
 def executeSQL(SQLFileName, cursor):    
     with open(SQLFileName, 'r') as SQLscript:
