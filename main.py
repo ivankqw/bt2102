@@ -373,7 +373,7 @@ def buySearchPage(root, cursor, currCustomerID):
                 elif getAndUpdateItem(productid):
                     messagebox.showinfo('Ran out of stock! Try again next time.')
                 else:
-                    messagebox.showinfo("Item bought: " + cursor.model + "!")
+                    messagebox.showinfo("Item bought: " + cursor.get("model") + "!")
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -382,30 +382,41 @@ def buySearchPage(root, cursor, currCustomerID):
     ws = root
     ws.title('Buy/Search product')
     ws.config(bg='#0B5A81')
-    tkinter.Button(text="Category search", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("simpleSearchPage")).pack()
+    tkinter.Button(text="Category search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("simpleSearchPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    tkinter.Button(text="Filter search", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("filterSearchPage")).pack()
+    tkinter.Button(text="Filter search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("filterSearchPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Label(text="Key in item ID here and click buy to purchase", width="300", height="2", font=("Calibri", 13)).pack()
     ##for buy entry
     tkinter.Label(text="Enter item ID here", bg='#CCCCCC', font=f.grid(row=0, column=0, sticky=tkinter.W, pady=10)).pack()
+    f = ('Times', 14)
     itemid = tkinter.Entry(font=f).pack()
-    tkinter.Button(text="Buy", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("buyCompletedPage")).pack()
+    tkinter.Button(text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: changepage("buyCompletedPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    itemid.grid(row=0, column=1, pady=10, padx=20)
+    itemid.grid(row=6, column=1, pady=10, padx=20)
     return
 
 def simpleSearchPage(root, cursor):
     ws = root
     ws.title('Choose a category!')
     ws.config(bg='#0B5A81')
-    tkinter.Button(text="Lights", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("lightsPage")).pack()
+    tkinter.Button(text="Lights", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("lightsPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    tkinter.Button(text="Locks", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("locksPage")).pack()
+    tkinter.Button(text="Locks", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("locksPage")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
     return
 
 def lightsPage(root, cursor):
+    ws = root
+    ws.title('Lights')
+    ws.config(bg='#0B5A81')
+    cursors = inventory.products.find({'productID' : productid})
+    for cursor in cursors:
+        itemDetails = ""
+        itemDetails += ""
+        tkinter.Label(text="", bg='#0B5A81').pack() 
+        tkinter.Label(text="", bg='#0B5A81').pack() 
+
 
 
 ##HELPER FUNCTIONS
