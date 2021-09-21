@@ -38,7 +38,7 @@ def create_indexes_mongo():
     return
 
 # MYSQL Schema
-def init_mysql(host='localhost',user='root',password=''):
+def init_mysql(host='localhost',user='root',password='s9935327i'):
     mydb = mysql.connector.connect(host=host,user=user,passwd=password,database="oshes")
     mycursor = mydb.cursor()
     
@@ -86,3 +86,11 @@ def products_info_to_sql(password):
     products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
 
 # create_db_mysql(password='password')
+<<<<<<< Updated upstream
+=======
+init_mysql()
+items_info_to_sql("s9935327i")
+products_info_to_sql("s9935327i")
+
+
+>>>>>>> Stashed changes

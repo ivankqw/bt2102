@@ -379,7 +379,11 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
+<<<<<<< Updated upstream
 MYSQL_PASSWORD = "" #your pw here since everyone got diff pw
+=======
+MYSQL_PASSWORD = "s9935237i" #your pw here since everyone got diff pw
+>>>>>>> Stashed changes
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
