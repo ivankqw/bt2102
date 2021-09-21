@@ -6,7 +6,11 @@ import json
 import pandas as pd
 from sqlalchemy import create_engine
 
+<<<<<<< Updated upstream
 def create_db_mysql(host='localhost',user='root',password=''):
+=======
+def create_db_mysql(host='localhost',user='root',password='s9938580d'):
+>>>>>>> Stashed changes
     mydb = mysql.connector.connect(host=host,user=user,passwd=password)
     mycursor = mydb.cursor()
     mycursor.execute("CREATE DATABASE oshes")
@@ -35,7 +39,11 @@ def create_indexes_mongo():
     items.create_index([("Category", TEXT), ("Model", TEXT)])
     return
 
+<<<<<<< Updated upstream
 def init_mysql(host='localhost',user='root',password=''):
+=======
+def init_mysql(host='localhost',user='root',password='s9938580d'):
+>>>>>>> Stashed changes
     mydb = mysql.connector.connect(host=host,user=user,passwd=password,database="oshes")
     mycursor = mydb.cursor()
     
@@ -60,4 +68,11 @@ def items_info_to_sql(password):
 
 
 
+<<<<<<< Updated upstream
 #create_db_mysql(password='s9938580d')
+=======
+#create_db_mysql(password='s9938580d')
+init_mysql(host='localhost',user='root',password='s9938580d')
+#init_mongo()
+#items_info_to_sql('s9938580d')
+>>>>>>> Stashed changes

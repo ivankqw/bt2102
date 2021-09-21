@@ -389,6 +389,12 @@ init_mysql()
 
 currpage = "landing"
 #root = tkinter.Tk() 
+<<<<<<< Updated upstream
 #root.wm_geometry("500x500")
 #LandingPage(root)
 #root.mainloop()
+=======
+#root.wm_geometry("600x600")
+#LandingPage(root)
+#root.mainloop()
+>>>>>>> Stashed changes
