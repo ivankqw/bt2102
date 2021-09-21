@@ -490,7 +490,7 @@ def CustomerLoginPage(root, cursor):
                 else:
                     customerID = row[0]
                     customerName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !") #after this need to implement changepage("customerHomePage")
                     cursor.reset()
             except Exception as e:
                 messagebox.showerror('Error', e)
@@ -579,7 +579,7 @@ def AdminLoginPage(root, cursor):
                 else:
                     adminID = row[0]
                     adminName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !") #after this need to implement changepage("adminHomePage")
                     cursor.reset()
             except Exception as e:
                 messagebox.showerror('Error', e)
@@ -724,13 +724,13 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9938580d" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = " " #password here
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
-#init_mysql()
+init_mysql(password=" ") #password here
 
 currpage = "landing"
 root = tkinter.Tk() 
