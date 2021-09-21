@@ -85,10 +85,10 @@ def products_info_to_sql(password):
 
     products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
 
-create_db_mysql(password='s9938580d')
-#init_mysql("root")
-#items_info_to_sql("root")
-#products_info_to_sql("root")
+#create_db_mysql(password='s9938580d')
+#init_mysql(password="s9938580d")
+#items_info_to_sql(password="s9938580d")
+#products_info_to_sql(password="s9938580d")
 
 
 
