@@ -1,9 +1,15 @@
 import tkinter
+from tkinter import *
+from tkinter import ttk
 from tkinter.constants import TRUE
 import tkinter.messagebox as messagebox
+from tkscrolledframe import ScrolledFrame
+
 import mysql.connector
 import re
 from setup import init_mysql
+from pymongo import MongoClient
+
     
 def LandingPage(root):
     main_screen = root   
@@ -490,8 +496,10 @@ def CustomerLoginPage(root, cursor):
                 else:
                     customerID = row[0]
                     customerName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !")
+                    proceed = messagebox.askyesno(title="Logged in successfully. ", message="Welcome, " + customerName + " !" + "\nProceed to search and buy?")
                     cursor.reset()
+                    if proceed:
+                        changepage("customerHome")
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -642,6 +650,142 @@ def AdminLoginPage(root, cursor):
     tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
+def CustomerBuySearch(root, cursor, currCustomerID):
+    for widget in root.winfo_children():
+        widget.destroy()
+    def getAndUpdateItem(itemID):
+        update = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = '{}'".format(itemID)
+        cursor.execute(update)
+        mydb.commit()
+    
+    def buy_item(itemID):
+        if len(itemID) != 4 or not list(items.find({"ItemID":itemID})):
+            messagebox.showerror(title="Error", message="Please enter a valid Item ID")
+        buy = messagebox.askyesno(message="You are buying item {}".format(itemID))
+        if buy:
+            if itemSold(cursor, itemID):
+                messagebox.showerror(title="Out of stock", message="Item ID {} is out of stock.".format(itemID))
+            else:
+                getAndUpdateItem(itemID)
+                messagebox.showinfo(title="Item purchased!", message="Thank you for your purchase!\nItem bought: " + itemID)
+        
+
+    ws = root
+    ws.title('Customer - Home')
+    ws.config(bg='#0B5A81')
+    Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
+    Label(ws, text="", bg='#0B5A81').pack() 
+    Button(ws, text="Simple search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("simpleSearchPage")).pack()
+    Label(ws, text="", bg='#0B5A81').pack() 
+    Button(ws, text="Advanced search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("filterSearchPage")).pack()
+    Label(ws, text="", bg='#0B5A81').pack() 
+    Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
+    ##for buy entry
+    f = ('Times', 14)
+    Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
+    itemid = Entry(ws, font=f)
+    itemid.pack()
+    Button(ws, text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: buy_item(itemid.get())).pack()
+    Label(ws, text="", bg='#0B5A81').pack() 
+
+    return
+
+def simpleSearchPage(root, cursor):
+    for widget in root.winfo_children():
+        widget.destroy()
+    ws = root
+    ws.title('Choose a category!')
+    ws.config(bg='#0B5A81')
+    tkinter.Label(text="Select category", bg='#0B5A81').pack() 
+    # Category
+    categories = ["Lights", "Locks"]
+    category = StringVar()
+    category.set(categories[0])
+    dropcat = OptionMenu(root, category, *categories)
+    dropcat.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Light model:", bg='#0B5A81').pack()
+    # Model
+    lights = ["Light1", "Light2", "SmartHome1"]
+    light = StringVar()
+    light.set(lights[0])
+    droplight = OptionMenu(root, light, *lights)
+    droplight.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Lock model:", bg='#0B5A81').pack()
+    locks = ["Safe1", "Safe2", "Safe3", "SmartHome1"]
+    lock = StringVar()
+    lock.set(locks[0])
+    droplock = OptionMenu(root, lock, *locks)
+    droplock.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()))).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).pack(side=tkinter.TOP)
+    return
+
+
+
+def SimpleSearchResult(root, cursor, cat, mod):
+    for widget in root.winfo_children():
+        widget.destroy()
+    ws = root
+    ws.wm_geometry("850x450")
+    ws.title('Search results')
+    ws.config(bg='#0B5A81')
+    f = ('Calibri', 13)
+    Label(text="Search results for category: " + cat + ", model: " + mod, bg='#CCCCCC', font=f).grid(row=0, column=0) 
+
+    # display search result below
+
+    style = ttk.Style()
+    style.theme_use("default")
+    columns = ('ItemID', 'Color', 'Factory', 'PowerSupply', 'PurchaseStatus', 'ProductionYear', 'Price', 'Warranty (months)')
+    tree = ttk.Treeview(root, columns=columns, show = 'headings')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=NO)
+        tree.heading("#{}".format(i+1), text= columns[i])
+
+
+    for item in items.find({"Category": cat, "Model":mod}):
+        if itemSold(cursor, item['ItemID']):
+            continue
+        values = (
+            item['ItemID'], 
+            item['Color'],
+            item['Factory'],
+            item['PowerSupply'],
+            item['PurchaseStatus'],
+            item['ProductionYear'],
+            itemPriceWarranty(item['Category'], item['Model'])[0],
+            itemPriceWarranty(item['Category'], item['Model'])[1]
+            )
+        tree.insert("", "end", values = values)
+
+    tree.grid(row=1, column=0, sticky='nsew')
+    scrollbar = ttk.Scrollbar(ws, orient=VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.grid(row=1, column=1, sticky='ns')
+
+
+    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: simpleSearchPage(root,cursor)).grid(row=2, column=0)
+    tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=3, column=0)
+
+def itemSold(cursor, itemID):
+    # Returns true if item is sold (based on MYSQL item relation) and false otherwise
+    return mysqlSelect("SELECT * from item WHERE itemID = '{}'".format(itemID), cursor)[0][4] == 'Sold'
+
+def itemPriceWarranty(cat, mod):
+    # Returns (price, warranty) of item's category and model from mongodb products collection
+    d = list(products.find({'Category':cat, 'Model':mod}))[0]
+    price = d['Price ($)']
+    warranty = d['Warranty (months)']
+    return (price, warranty)
+
 def changepage(other):
     global currpage, root
     for widget in root.winfo_children():
@@ -661,6 +805,12 @@ def changepage(other):
     elif other == "landing":
         LandingPage(root)
         currpage = "landing"
+    elif other == "customerHome":
+        currpage = "customerHome"
+        CustomerBuySearch(root, mycursor, customerID)
+    elif other == "simpleSearchPage":
+        currpage = "simpleSearchPage"
+        simpleSearchPage(root, mycursor)
 
 def executeSQL(SQLFileName, cursor):    
     with open(SQLFileName, 'r') as SQLscript:
@@ -677,14 +827,25 @@ def mysqlSelect(command, cursor):
     result = cursor.fetchall()
     return result
 
+# Global variables
 
+customerName = ""
+customerID = ""
+
+# Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
+
+# Connect MongoDB
+client = MongoClient()
+mongo = client['Inventory']
+items = mongo.items
+products = mongo.products
 
 #init_mysql()
 
