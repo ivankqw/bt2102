@@ -675,9 +675,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     ws.config(bg='#0B5A81')
     Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
     Label(ws, text="", bg='#0B5A81').pack() 
-    Button(ws, text="Simple search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("simpleSearchPage")).pack()
-    Label(ws, text="", bg='#0B5A81').pack() 
-    Button(ws, text="Advanced search", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("filterSearchPage")).pack()
+    Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage")).pack()
     Label(ws, text="", bg='#0B5A81').pack() 
     Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
     ##for buy entry
@@ -690,15 +688,16 @@ def CustomerBuySearch(root, cursor, currCustomerID):
 
     return
 
-def simpleSearchPage(root, cursor):
+def SearchPage(root, cursor, customerID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
     ws.config(bg='#0B5A81')
     tkinter.Label(text="Select category", bg='#0B5A81').pack() 
+    default_category = "No option selected"
     # Category
-    categories = ["Lights", "Locks"]
+    categories = [default_category, "Lights", "Locks"]
     category = StringVar()
     category.set(categories[0])
     dropcat = OptionMenu(root, category, *categories)
@@ -707,7 +706,7 @@ def simpleSearchPage(root, cursor):
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Light model:", bg='#0B5A81').pack()
     # Model
-    lights = ["Light1", "Light2", "SmartHome1"]
+    lights = [default_category, "Light1", "Light2", "SmartHome1"]
     light = StringVar()
     light.set(lights[0])
     droplight = OptionMenu(root, light, *lights)
@@ -715,22 +714,75 @@ def simpleSearchPage(root, cursor):
 
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Lock model:", bg='#0B5A81').pack()
-    locks = ["Safe1", "Safe2", "Safe3", "SmartHome1"]
+    locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
     lock = StringVar()
     lock.set(locks[0])
     droplock = OptionMenu(root, lock, *locks)
     droplock.pack()
 
     tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Advanced Filter Options:", bg='#0B5A81').pack()
+
+    ##Advanced options
+    advanced_options = []
     tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()))).pack()
+    tkinter.Label(text="Select Color:", bg='#0B5A81').pack()
+    colors = [default_category, "White", "Blue", "Yellow", "Green", "Black", "White"]
+    color = StringVar()
+    color.set(locks[0])
+    dropcolor = OptionMenu(root, color, *colors)
+    dropcolor.pack()
+    if (color.get() == default_category):
+        advanced_options.append(1)
+    else:
+        advanced_options.append(color.get())
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Factory:", bg='#0B5A81').pack()
+    factories = [default_category, "Malaysia", "China", "Philippines"]
+    factory = StringVar()
+    factory.set(locks[0])
+    dropfactory = OptionMenu(root, factory, *factories)
+    dropfactory.pack()
+    if (factory.get() == default_category):
+        advanced_options.append(1)
+    else:
+        advanced_options.append(factory.get())
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Power Supply:", bg='#0B5A81').pack()
+    powersupplies = [default_category, "Battery", "USB"]
+    powersupply = StringVar()
+    powersupply.set(locks[0])
+    droppowersupply = OptionMenu(root, powersupply, *powersupplies)
+    droppowersupply.pack()
+    if (powersupply.get() == default_category):
+        advanced_options.append(1)
+    else:
+        advanced_options.append(powersupply.get())
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Production Year:", bg='#0B5A81').pack()
+    prodyears = [default_category, "2014", "2015", "2016", "2017", "2018", "2019", "2020",]
+    prodyear = StringVar()
+    prodyear.set(locks[0])
+    dropprodyear = OptionMenu(root, prodyear, *prodyears)
+    dropprodyear.pack()
+    if (prodyear.get() == default_category):
+        advanced_options.append(1)
+    else:
+        advanced_options.append(prodyear.get())
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
+    command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options)).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).pack(side=tkinter.TOP)
     return
 
 
-
-def SimpleSearchResult(root, cursor, cat, mod):
+def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
@@ -738,7 +790,15 @@ def SimpleSearchResult(root, cursor, cat, mod):
     ws.title('Search results')
     ws.config(bg='#0B5A81')
     f = ('Calibri', 13)
-    Label(text="Search results for category: " + cat + ", model: " + mod, bg='#CCCCCC', font=f).grid(row=0, column=0) 
+    default_category = "No option selected"
+    if cat == default_category and mod == default_category:
+        Label(text="No category/model selected. Showing all results." , bg='#CCCCCC', font=f).grid(row=0, column=0)
+    elif cat == default_category:
+        Label(text="No category selected. Showing all categories." , bg='#CCCCCC', font=f).grid(row=0, column=0)
+    elif mod == default_category:
+        Label(text="No category selected. Showing all models." , bg='#CCCCCC', font=f).grid(row=0, column=0)
+    else: 
+        Label(text="Search results for category: " + cat + ", model: " + mod, bg='#CCCCCC', font=f).grid(row=0, column=0) 
 
     # display search result below
 
@@ -749,11 +809,17 @@ def SimpleSearchResult(root, cursor, cat, mod):
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=NO)
         tree.heading("#{}".format(i+1), text= columns[i])
-
-
-    for item in items.find({"Category": cat, "Model":mod}):
+    
+    color = advanced_options[0]
+    factory = advanced_options[1]
+    powerSupply = advanced_options[2]
+    prodYear = advanced_options[3]
+    item_count = 0
+    ##shld be below but doesnt work 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear 
+    for item in items.find({'Category':cat, 'Model':mod}):
         if itemSold(cursor, item['ItemID']):
             continue
+        item_count += 1
         values = (
             item['ItemID'], 
             item['Color'],
@@ -770,9 +836,12 @@ def SimpleSearchResult(root, cursor, cat, mod):
     scrollbar = ttk.Scrollbar(ws, orient=VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
+    if item_count == 0:
+        tkinter.Label(text="No items matching your search.", bg='#0B5A81').pack()
+    else:
+        tkinter.Label(text="Number of items in stock: " + item_count, bg='#0B5A81').pack()
 
-
-    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: simpleSearchPage(root,cursor)).grid(row=2, column=0)
+    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=2, column=0)
     tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=3, column=0)
 
 def itemSold(cursor, itemID):
@@ -808,9 +877,9 @@ def changepage(other):
     elif other == "customerHome":
         currpage = "customerHome"
         CustomerBuySearch(root, mycursor, customerID)
-    elif other == "simpleSearchPage":
-        currpage = "simpleSearchPage"
-        simpleSearchPage(root, mycursor)
+    elif other == "SearchPage":
+        currpage = "SearchPage"
+        SearchPage(root, mycursor, customerID)
 
 def executeSQL(SQLFileName, cursor):    
     with open(SQLFileName, 'r') as SQLscript:
@@ -835,7 +904,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Cf66486648" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
