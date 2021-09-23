@@ -1,8 +1,9 @@
 import tkinter
-from tkinter.constants import TRUE
+from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
 import mysql.connector
 import re
+from tkinter import ttk
 from setup import init_mysql
     
 def LandingPage(root):
@@ -686,7 +687,6 @@ def CustomerHomePage(root, cursor):
 
     return 
 
-#need to work on this, which filters out requests that already have its service fees paid
 def ApproveHomePage(root, cursor):
     main_screen = root    
     main_screen.title("OSHES app") 
@@ -694,20 +694,38 @@ def ApproveHomePage(root, cursor):
     main_screen.grid() 
 
     tkinter.Label(text="Here are the requests waiting for approval :)", width="300", height="2", font=("Calibri", 13)).pack() 
-    selection_statement = "SELECT requestID, requestDate, requestStatus, customerID, adminID, itemID FROM Request WHERE requestStatus = 'In progress'"
-    try:
-        cursor.execute(selection_statement)
-        table_info = cursor.fetchall()
-        if table_info == None:
-            messagebox.showinfo('Good news!', 'No requests waiting to be approved')
-        else:
-            for row in table_info:
-                print(row)
-                print("\n")
-            cursor.reset()
-    except Exception as e:
-        messagebox.showerror('Error', e)
+    selection_statement = "SELECT * FROM request WHERE requestStatus = 'In Progress'"
+    cursor.execute(selection_statement)
+    table_info = cursor.fetchall()
 
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID'), show = 'headings')
+
+    root.title('Approval Page')
+    tree.column('#1', anchor = CENTER, width = '100')
+    tree.heading('#1', text = 'Request ID')
+    tree.column('#2', anchor = CENTER, width = '100')
+    tree.heading('#2', text = 'Date of Request')
+    tree.column('#3', anchor = CENTER, width = '100')
+    tree.heading('#3', text = 'Request Status')
+    tree.column('#4', anchor = CENTER, width = '100')
+    tree.heading('#4', text = 'Customer ID')
+    tree.column('#5', anchor = CENTER, width = '100')
+    tree.heading('#5', text = 'Admin ID')
+    tree.column('#6', anchor = CENTER, width = '100')
+    tree.heading('#6', text = 'Item ID')
+
+    if table_info == []:
+        messagebox.showinfo('Good news!', 'No requests waiting to be approved')
+    else:
+        for i in table_info:
+            tree.insert("", "end", values = i)
+        tree.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
+    return 
 
 def changepage(other):
     global currpage, root
