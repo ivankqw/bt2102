@@ -83,6 +83,7 @@ def AdminSignUpPage(root, cursor, db):
                 cursor.execute(insert_statement,(register_name.get(), var.get(), register_mobile.get(), register_pwd.get()))
                 db.commit()
                 messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as an Administrator!')
+                tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack()
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -298,6 +299,7 @@ def CustomerSignUpPage(root, cursor, db):
                 cursor.execute(insert_statement,(register_name.get(), register_pwd.get(), register_mobile.get(), var.get(), register_address.get(), register_email.get()))
                 db.commit()
                 messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as a Customer!')
+                tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginCustomer")).pack()
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -490,8 +492,9 @@ def CustomerLoginPage(root, cursor):
                 else:
                     customerID = row[0]
                     customerName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !") #after this need to implement changepage("customerHomePage")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !") 
                     cursor.reset()
+                    changepage("customerHomePage")
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -579,8 +582,9 @@ def AdminLoginPage(root, cursor):
                 else:
                     adminID = row[0]
                     adminName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !") #after this need to implement changepage("adminHomePage")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !") 
                     cursor.reset()
+                    changepage("adminHomePage")
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -650,14 +654,17 @@ def AdminHomePage(root, cursor):
      
     tkinter.Label(text="Welcome to Admin's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("inventoryHomePage")).pack() 
+    #uncomment end of the lines and remove pack() below when implemented these pages
+    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("inventoryHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("serviceStatusesHomePage")).pack() 
+    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("serviceStatusesHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("unpaidHomePage")).pack() 
+    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("unpaidHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("approveHomePage")).pack() 
- 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+
     return 
  
 def CustomerHomePage(root, cursor): 
@@ -668,16 +675,39 @@ def CustomerHomePage(root, cursor):
      
     tkinter.Label(text="Welcome to Customer's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("buyItemsHomePage")).pack() 
+    #uncomment end of the lines and remove pack() below when implemented these pages
+    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("buyItemsHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("requestServiceHomePage")).pack() 
+    tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("requestServiceHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("payServiceHomePage")).pack()
+    tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("payServiceHomePage")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
     return 
 
 #need to work on this, which filters out requests that already have its service fees paid
-#def ApproveHomePage(root, cursor)
+def ApproveHomePage(root, cursor):
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+
+    tkinter.Label(text="Here are the requests waiting for approval :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    selection_statement = "SELECT requestID, requestDate, requestStatus, customerID, adminID, itemID FROM Request WHERE requestStatus = 'In progress'"
+    try:
+        cursor.execute(selection_statement)
+        table_info = cursor.fetchall()
+        if table_info == None:
+            messagebox.showinfo('Good news!', 'No requests waiting to be approved')
+        else:
+            for row in table_info:
+                print(row)
+                print("\n")
+            cursor.reset()
+    except Exception as e:
+        messagebox.showerror('Error', e)
+
 
 def changepage(other):
     global currpage, root
@@ -704,6 +734,9 @@ def changepage(other):
     elif other == "adminHomePage":
         AdminHomePage(root, mycursor)
         currpage = "adminHomePage"
+    elif other == "approveHomePage":
+        ApproveHomePage(root, mycursor)
+        currpage = "approveHomePage"
 
 
 def executeSQL(SQLFileName, cursor):    
@@ -724,13 +757,13 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = " " #password here
+MYSQL_PASSWORD = "s9938580d" #password here
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
-init_mysql(password=" ") #password here
+init_mysql(password="s9938580d") #password here
 
 currpage = "landing"
 root = tkinter.Tk() 
