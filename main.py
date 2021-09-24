@@ -3,6 +3,8 @@ from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
 from tkscrolledframe import ScrolledFrame
 
+from datetime import datetime
+
 import mysql.connector
 import re
 from tkinter import ttk
@@ -746,8 +748,12 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     for widget in root.winfo_children():
         widget.destroy()
     def getAndUpdateItem(itemID):
-        update = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = '{}'".format(itemID)
-        cursor.execute(update)
+        updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = '{}'".format(itemID)
+        cursor.execute(updatePurchaseStatus)
+        updateCustomerID = "UPDATE item SET customerID = {} WHERE itemID = '{}'".format(currCustomerID, itemID)
+        cursor.execute(updateCustomerID)
+        updateDateOfPurchase = "UPDATE item SET dateOfPurchase = {} WHERE itemID = '{}'".format(datetime.today().strftime('%Y-%m-%d'), itemID)
+        cursor.execute(updateDateOfPurchase)
         mydb.commit()
     
     def buy_item(itemID):
@@ -1024,7 +1030,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Cf66486648" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
