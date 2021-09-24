@@ -2,6 +2,7 @@ import tkinter
 from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
 from tkscrolledframe import ScrolledFrame
+from PIL import ImageTk, Image
 
 import mysql.connector
 import re
@@ -11,7 +12,7 @@ from pymongo import MongoClient
 
     
 def LandingPage(root):
-    main_screen = root   
+    """ main_screen = root   
     main_screen.title("OSHES app")
     main_screen.config(bg='#0B5A81') 
     main_screen.grid()
@@ -24,9 +25,78 @@ def LandingPage(root):
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Button(text="Admin Registration", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("registerAdmin")).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
-    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack()
+    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack() """
+    root.configure(bg = "#ffffff")
     
-    return 
+    canvas = tkinter.Canvas(
+        root,
+        bg = "#ffffff",
+        height = 700,
+        width = 1040,
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge")
+    canvas.place(x = 0, y = 0)
+    canvas.update()
+
+    background_img = ImageTk.PhotoImage(file = f"background.png")
+    background = canvas.create_image(
+        473, 350,
+        image=background_img)
+
+    img0 = ImageTk.PhotoImage(file = f"img0.png")
+    customer_reg = tkinter.Button(
+        image = img0,
+        borderwidth = 0,
+        highlightthickness = 0,
+        command = lambda: changepage("registerCustomer"),
+        relief = "flat")
+    
+    customer_reg.place(
+        x = 600, y = 247,
+        width = 400,
+        height = 67)
+
+    img1 = ImageTk.PhotoImage(file = f"img1.png")
+    admin_log = tkinter.Button(
+        image = img1,
+        borderwidth = 0,
+        highlightthickness = 0,
+        command = lambda: changepage("loginAdmin"),
+        relief = "flat")
+
+    admin_log.place(
+        x = 600, y = 503,
+        width = 400,
+        height = 67)
+
+    img2 = ImageTk.PhotoImage(file = f"img2.png")
+    admin_reg = tkinter.Button(
+        image = img2,
+        borderwidth = 0,
+        highlightthickness = 0,
+        command = lambda: changepage("registerAdmin"),
+        relief = "flat")
+
+    admin_reg.place(
+        x = 600, y = 417,
+        width = 400,
+        height = 67)
+
+    img3 = ImageTk.PhotoImage(file = f"img3.png")
+    customer_log = tkinter.Button(
+        image = img3,
+        borderwidth = 0,
+        highlightthickness = 0,
+        command = lambda: changepage("loginCustomer"),
+        relief = "flat")
+
+    customer_log.place(
+        x = 600, y = 332,
+        width = 400,
+        height = 67)
+    root.mainloop()
+    return
 
 def AdminSignUpPage(root, cursor, db): 
     def validate_signup_admin():
