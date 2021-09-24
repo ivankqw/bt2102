@@ -660,17 +660,125 @@ def AdminHomePage(root, cursor):
     tkinter.Label(text="Welcome to Admin's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     #uncomment end of the lines and remove pack() below when implemented these pages
-    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("inventoryHomePage")).pack() 
+    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("inventoryHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("serviceStatusesHomePage")).pack() 
+    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("serviceStatusesHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
-    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("unpaidHomePage")).pack() 
+    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("unpaidHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("approveHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
     return 
+
+def InventoryHomePage(root, mycursor):
+    sql1 = "SELECT A.productID, A.Sold, B.Unsold \
+    FROM (SELECT productID, COUNT(purchaseStatus) as Sold \
+    FROM item \
+    WHERE purchaseStatus = 'Sold' \
+    GROUP by productID) AS A \
+    CROSS JOIN(SELECT productID, COUNT(purchaseStatus) as Unsold \
+    FROM item \
+    WHERE purchaseStatus = 'Unsold' \
+    GROUP by productID) AS B \
+    ON A.productID = B.productID"
+    mycursor.execute(sql1)
+    myresult = mycursor.fetchall()
+
+    tkinter.Label(text="Items under service", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('IID','Number of SOLD items', 'Number of UNSOLD items'), show = 'headings')
+    
+    root.title('Inventory')
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'IID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Number of SOLD items')
+    tree.column("#3", anchor = CENTER, width = 195)
+    tree.heading('#3', text = 'Number of UNSOLD items')
+
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
+
+    scrollbar = ttk.Scrollbar(root, orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
+
+def ServiceStatusesPage(root, mycursor):
+    sql2 = "SELECT itemID,productID,serviceStatus FROM item\
+    WHERE serviceStatus = 'In progress' OR serviceStatus = 'Waiting for approval'\
+    UNION\
+    SELECT 'Total items under service', '', COUNT(*) FROM item\
+    WHERE serviceStatus = 'In progress' OR serviceStatus = 'Waiting for approval'\
+    ORDER by itemID"
+    mycursor.execute(sql2)
+    myresult = mycursor.fetchall()
+
+    tkinter.Label(text="Items under service", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('Item ID','Product ID', 'Service Status'), show = 'headings')
+
+    root.title('Items under service')
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'Item ID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Product ID')
+    tree.column("#3", anchor = CENTER, width = 195)
+
+    tree.heading('#3', text = 'Service Status')
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
+
+    scrollbar = ttk.Scrollbar(root, orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
+
+def UnpaidHomePage(root, mycursor):
+    sql3 = "\
+    SELECT customerID, itemID, requestID from request\
+    WHERE requestStatus = 'Submitted and Waiting for payment' \
+    UNION \
+    SELECT 'Total no. of unpaid customers', '', count(*) from request \
+    WHERE requestStatus = 'Submitted and Waiting for payment'"
+
+    mycursor.execute(sql3)
+    myresult = mycursor.fetchall()
+
+    tkinter.Label(text="Customers with unpaid service fees", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('Customer ID','Item ID', 'Request ID'), show = 'headings')
+    
+    root.title("Customers with unpaid service fees")
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'Customer ID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Item ID')
+    tree.column("#3", anchor = CENTER, width = 195)
+    tree.heading('#3', text = 'Request ID')
+
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
+
+    scrollbar = ttk.Scrollbar(orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
  
 def CustomerHomePage(root, cursor, customerID): 
     main_screen = root    
@@ -998,6 +1106,12 @@ def changepage(other, optional=""):
     elif other == "SearchPage":
         SearchPage(root, mycursor, optional)
         currpage = "SearchPage"
+    elif other == "inventoryHomePage":
+        InventoryHomePage(root, mycursor)
+    elif other == "serviceStatusesHomePage":
+        ServiceStatusesPage(root, mycursor)
+    elif other == "unpaidHomePage":
+        UnpaidHomePage(root, mycursor)
 
 
 
