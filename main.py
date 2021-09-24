@@ -693,6 +693,7 @@ def SearchPage(root, cursor, customerID):
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
+    ws.wm_geometry("450x900")
     ws.config(bg='#0B5A81')
     tkinter.Label(text="Select category", bg='#0B5A81').pack() 
     default_category = "No option selected"
@@ -724,7 +725,9 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="Advanced Filter Options:", bg='#0B5A81').pack()
 
     ##Advanced options
-    advanced_options = []
+    
+    # Colour
+    
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Color:", bg='#0B5A81').pack()
     colors = [default_category, "White", "Blue", "Yellow", "Green", "Black", "White"]
@@ -732,11 +735,8 @@ def SearchPage(root, cursor, customerID):
     color.set(locks[0])
     dropcolor = OptionMenu(root, color, *colors)
     dropcolor.pack()
-    if (color.get() == default_category):
-        advanced_options.append(1)
-    else:
-        advanced_options.append(color.get())
-
+    
+    # Factory
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Factory:", bg='#0B5A81').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
@@ -744,11 +744,8 @@ def SearchPage(root, cursor, customerID):
     factory.set(locks[0])
     dropfactory = OptionMenu(root, factory, *factories)
     dropfactory.pack()
-    if (factory.get() == default_category):
-        advanced_options.append(1)
-    else:
-        advanced_options.append(factory.get())
 
+    # Power supply
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Power Supply:", bg='#0B5A81').pack()
     powersupplies = [default_category, "Battery", "USB"]
@@ -756,11 +753,8 @@ def SearchPage(root, cursor, customerID):
     powersupply.set(locks[0])
     droppowersupply = OptionMenu(root, powersupply, *powersupplies)
     droppowersupply.pack()
-    if (powersupply.get() == default_category):
-        advanced_options.append(1)
-    else:
-        advanced_options.append(powersupply.get())
 
+    # Production year
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Production Year:", bg='#0B5A81').pack()
     prodyears = [default_category, "2014", "2015", "2016", "2017", "2018", "2019", "2020",]
@@ -768,10 +762,8 @@ def SearchPage(root, cursor, customerID):
     prodyear.set(locks[0])
     dropprodyear = OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
-    if (prodyear.get() == default_category):
-        advanced_options.append(1)
-    else:
-        advanced_options.append(prodyear.get())
+
+    advanced_options = {'Color': color, 'Factory': factory, "PowerSupply": powersupply, "ProductionYear": prodyear}
 
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="", bg='#0B5A81').pack()
@@ -786,42 +778,67 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.wm_geometry("850x450")
+    ws.wm_geometry("1040x450")
     ws.title('Search results')
     ws.config(bg='#0B5A81')
     f = ('Calibri', 13)
+
+    color = advanced_options['Color'].get()
+    factory = advanced_options['Factory'].get()
+    powerSupply = advanced_options['PowerSupply'].get()
+    prodYear = advanced_options['ProductionYear'].get()
+
     default_category = "No option selected"
-    if cat == default_category and mod == default_category:
-        Label(text="No category/model selected. Showing all results." , bg='#CCCCCC', font=f).grid(row=0, column=0)
-    elif cat == default_category:
-        Label(text="No category selected. Showing all categories." , bg='#CCCCCC', font=f).grid(row=0, column=0)
-    elif mod == default_category:
-        Label(text="No category selected. Showing all models." , bg='#CCCCCC', font=f).grid(row=0, column=0)
-    else: 
-        Label(text="Search results for category: " + cat + ", model: " + mod, bg='#CCCCCC', font=f).grid(row=0, column=0) 
+    search_string = ""
+    if cat != default_category:
+        search_string += "Category: " + cat + ", "
+    if mod != default_category:
+        search_string += "Model: " + mod + ", "
+    if color != default_category:
+        search_string += "Color: " + color + ", "
+    if factory != default_category:
+        search_string += "Factory: " + factory + ", "
+    if powerSupply != default_category:
+        search_string += "powerSupply: " + powerSupply + ", "
+    if prodYear != default_category:
+        search_string += "productionYear: " + prodYear + ", "
+    Label(text="Search results for {}".format(search_string[:-2]), bg='#CCCCCC', font=f).grid(row=0, column=0) 
 
     # display search result below
 
     style = ttk.Style()
     style.theme_use("default")
-    columns = ('ItemID', 'Color', 'Factory', 'PowerSupply', 'PurchaseStatus', 'ProductionYear', 'Price', 'Warranty (months)')
+    columns = ('ItemID', 'Category','Model', 'Color', 'Factory', 'PowerSupply', 'PurchaseStatus', 'ProductionYear', 'Price', 'Warranty (months)')
     tree = ttk.Treeview(root, columns=columns, show = 'headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=NO)
         tree.heading("#{}".format(i+1), text= columns[i])
     
-    color = advanced_options[0]
-    factory = advanced_options[1]
-    powerSupply = advanced_options[2]
-    prodYear = advanced_options[3]
+    
     item_count = 0
-    ##shld be below but doesnt work 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear 
-    for item in items.find({'Category':cat, 'Model':mod}):
+    # 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear 
+    find_dict = {}
+    if cat != default_category:
+        find_dict['Category'] = cat
+    if mod != default_category:
+        find_dict['Model'] = mod
+    if color != default_category:
+        find_dict['Color'] = color
+    if factory != default_category:
+        find_dict['Factory'] = factory
+    if powerSupply != default_category:
+        find_dict['PowerSupply'] = powerSupply
+    if prodYear != default_category:
+        find_dict['ProductionYear'] = prodYear
+
+    for item in items.find(find_dict):
         if itemSold(cursor, item['ItemID']):
             continue
         item_count += 1
         values = (
             item['ItemID'], 
+            item['Category'], 
+            item['Model'], 
             item['Color'],
             item['Factory'],
             item['PowerSupply'],
@@ -837,12 +854,12 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
     if item_count == 0:
-        tkinter.Label(text="No items matching your search.", bg='#0B5A81').pack()
+        tkinter.Label(text="No items matching your search.", bg='#FFFFFF').grid(row=3, column=0)
     else:
-        tkinter.Label(text="Number of items in stock: " + item_count, bg='#0B5A81').pack()
+        tkinter.Label(text="Number of items in stock: " + str(item_count), bg='#FFFFFF').grid(row=3, column=0)
 
-    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=2, column=0)
-    tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=3, column=0)
+    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
+    tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
 
 def itemSold(cursor, itemID):
     # Returns true if item is sold (based on MYSQL item relation) and false otherwise
@@ -904,7 +921,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Cf66486648" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
