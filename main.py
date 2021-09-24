@@ -744,17 +744,11 @@ def ApproveHomePage(root, cursor):
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
     return 
+
 def CustomerBuySearch(root, cursor, currCustomerID):
     for widget in root.winfo_children():
         widget.destroy()
-    def getAndUpdateItem(itemID):
-        updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = {}".format(itemID)
-        cursor.execute(updatePurchaseStatus)
-        updateCustomerID = "UPDATE item SET customerID = {} WHERE itemID = {}".format(currCustomerID, itemID)
-        cursor.execute(updateCustomerID)
-        updateDateOfPurchase = "UPDATE item SET dateOfPurchase = '{}' WHERE itemID = {}".format(datetime.today().strftime('%Y-%m-%d'), itemID)
-        cursor.execute(updateDateOfPurchase)
-        mydb.commit()
+    
     
     def buy_item(itemID):
         if len(itemID) != 4 or not list(items.find({"ItemID":itemID})):
@@ -764,7 +758,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
             if itemSold(cursor, itemID):
                 messagebox.showerror(title="Out of stock", message="Item ID {} is out of stock.".format(itemID))
             else:
-                getAndUpdateItem(itemID)
+                getAndUpdateItem(itemID, currCustomerID)
                 messagebox.showinfo(title="Item purchased!", message="Thank you for your purchase!\nItem bought: " + itemID)
         
 
@@ -773,7 +767,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     ws.config(bg='#0B5A81')
     tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + str(currCustomerID) + "]",width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(ws, text="", bg='#0B5A81').pack() 
-    tkinter.Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage", customerID)).pack()
+    tkinter.Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage", currCustomerID)).pack()
     tkinter.Label(ws, text="", bg='#0B5A81').pack() 
     tkinter.Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
     ##for buy entry
@@ -866,13 +860,13 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
-    command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options)).pack()
+    command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options, customerID)).pack()
     tkinter.Label(text="", bg='#0B5A81').pack() 
     tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).pack(side=tkinter.TOP)
     return
 
 
-def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
+def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
@@ -957,17 +951,43 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
             if int(label.grid_info()["row"]) > 7:
                 label.grid_forget()
         curItems = tree.selection()
+        print(curItems)
         tkinter.Label(root, text="\n".join([str(tree.item(i)['values']) for i in curItems])).grid(row=8, column=0)
+    
     tree.bind("<Return>", lambda e: select())
+
+    def buy_selected(selected_items):
+        buy_itemIDs = []
+        for i in selected_items:
+            itemId = tree.item(i)['values'][0]
+            buy_itemIDs.append(itemId)
+        
+        buyall = messagebox.askyesno(title="Confirm Purchase", message="Click Yes to confirm purchase of the following items: \n\n{}".format(buy_itemIDs))
+        if buyall:
+            for i in buy_itemIDs:
+                getAndUpdateItem(i, customerID)
+            messagebox.showinfo(title="Items purchased", message="Items successfully purchased. Thank you!")
+            SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID)
+            
+
     if item_count == 0:
         tkinter.Label(text="No items matching your search.", bg='#FFFFFF').grid(row=3, column=0)
     else:
         tkinter.Label(text="Number of items in stock: " + str(item_count), bg='#FFFFFF').grid(row=3, column=0)
     
-    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
-    tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
-    tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="yellow", relief=tkinter.SOLID,command= lambda: print("")).grid(row=6, column=0)
+    tkinter.Button(text="Back to search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
+    tkinter.Button(text="Back to buy/search page", height="2", width="50", bg="#b5f09d", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
+    tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=('Calibri', 20),  relief=tkinter.SOLID,command= lambda: buy_selected(tree.selection())).grid(row=6, column=0)
     tkinter.Label(root, text="Items selected: ").grid(row=7, column=0)
+
+def getAndUpdateItem(itemID, customerID):
+        updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = {}".format(itemID)
+        mycursor.execute(updatePurchaseStatus)
+        updateCustomerID = "UPDATE item SET customerID = {} WHERE itemID = {}".format(customerID, itemID)
+        mycursor.execute(updateCustomerID)
+        updateDateOfPurchase = "UPDATE item SET dateOfPurchase = '{}' WHERE itemID = {}".format(datetime.today().strftime('%Y-%m-%d'), itemID)
+        mycursor.execute(updateDateOfPurchase)
+        mydb.commit()
 
 def itemSold(cursor, itemID):
     # Returns true if item is sold (based on MYSQL item relation) and false otherwise
@@ -1040,7 +1060,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Cf66486648" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
