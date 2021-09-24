@@ -717,7 +717,7 @@ def mysqlSelect(command, cursor):
     cursor.execute(command)
     result = cursor.fetchall()
     return result
-
+#rand
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
