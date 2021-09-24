@@ -1,12 +1,11 @@
 import tkinter
-from tkinter import *
-from tkinter import ttk
-from tkinter.constants import TRUE
+from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
 from tkscrolledframe import ScrolledFrame
 
 import mysql.connector
 import re
+from tkinter import ttk
 from setup import init_mysql
 from pymongo import MongoClient
 
@@ -89,6 +88,7 @@ def AdminSignUpPage(root, cursor, db):
                 cursor.execute(insert_statement,(register_name.get(), var.get(), register_mobile.get(), register_pwd.get()))
                 db.commit()
                 messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as an Administrator!')
+                tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack()
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -304,6 +304,7 @@ def CustomerSignUpPage(root, cursor, db):
                 cursor.execute(insert_statement,(register_name.get(), register_pwd.get(), register_mobile.get(), var.get(), register_address.get(), register_email.get()))
                 db.commit()
                 messagebox.showinfo('Confirmation', 'You have successfully registered! Please go back to the main page to Log in as a Customer!')
+                tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginCustomer")).pack()
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -496,10 +497,9 @@ def CustomerLoginPage(root, cursor):
                 else:
                     customerID = row[0]
                     customerName = row[1]
-                    proceed = messagebox.askyesno(title="Logged in successfully. ", message="Welcome, " + customerName + " !" + "\nProceed to search and buy?")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + customerName + " !") 
                     cursor.reset()
-                    if proceed:
-                        changepage("customerHome")
+                    changepage("customerHomePage", customerID)
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -587,8 +587,9 @@ def AdminLoginPage(root, cursor):
                 else:
                     adminID = row[0]
                     adminName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !")
+                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !") 
                     cursor.reset()
+                    changepage("adminHomePage")
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -650,6 +651,97 @@ def AdminLoginPage(root, cursor):
     tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
     return 
 
+def AdminHomePage(root, cursor): 
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+     
+    tkinter.Label(text="Welcome to Admin's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    #uncomment end of the lines and remove pack() below when implemented these pages
+    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("inventoryHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("serviceStatusesHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("unpaidHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("approveHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+
+    return 
+ 
+def CustomerHomePage(root, cursor, customerID): 
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+     
+    tkinter.Label(text="Welcome to Customer's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    #uncomment end of the lines and remove pack() below when implemented these pages
+    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("CustomerBuySearch", customerID)).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("requestServiceHomePage")).pack() 
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("payServiceHomePage")).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
+
+    return 
+
+def ApproveHomePage(root, cursor):
+    def approve_request():
+        selected = tree.focus()
+        temp = tree.item(selected, 'values')
+        approve = "Approved"
+        tree.item(selected, values=(temp[0], temp[1], approve, temp[3], temp[4], temp[5]))
+        sql_statement = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
+        cursor.execute(sql_statement % temp[0]) #correct, just change comma to %
+        mydb.commit() #need to commit if not mysql database would not be updated
+        messagebox.showinfo("Success! ", "You have successfully approved the following: Request ID " + temp[0]) #messagebox after everything
+
+    main_screen = root    
+    main_screen.title("OSHES app") 
+    main_screen.config(bg='#0B5A81')  
+    main_screen.grid() 
+
+    tkinter.Label(text="Here are the requests waiting for approval :)", width="300", height="2", font=("Calibri", 13)).pack() 
+    selection_statement = "SELECT * FROM request WHERE requestStatus = 'In Progress'"
+    cursor.execute(selection_statement)
+    table_info = cursor.fetchall()
+    cursor.reset()
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID', 'Approve?'), show = 'headings')
+    tree.pack()
+
+    root.title('Approval Page')
+    tree.column('#1', anchor = CENTER, width = '100')
+    tree.heading('#1', text = 'Request ID')
+    tree.column('#2', anchor = CENTER, width = '100')
+    tree.heading('#2', text = 'Date of Request')
+    tree.column('#3', anchor = CENTER, width = '100')
+    tree.heading('#3', text = 'Request Status')
+    tree.column('#4', anchor = CENTER, width = '100')
+    tree.heading('#4', text = 'Customer ID')
+    tree.column('#5', anchor = CENTER, width = '100')
+    tree.heading('#5', text = 'Admin ID')
+    tree.column('#6', anchor = CENTER, width = '100')
+    tree.heading('#6', text = 'Item ID')
+
+    if table_info == []:
+        messagebox.showinfo('Good news!', 'No requests waiting to be approved')
+    else:
+        for i in table_info:
+            tree.insert("", "end", values = i)
+        tkinter.Button(text = 'Approve', command = approve_request).pack()
+        
+    tkinter.Label(text="", bg='#0B5A81').pack()  
+    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
+    return 
 def CustomerBuySearch(root, cursor, currCustomerID):
     for widget in root.winfo_children():
         widget.destroy()
@@ -673,18 +765,18 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     ws = root
     ws.title('Customer - Home')
     ws.config(bg='#0B5A81')
-    Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
-    Label(ws, text="", bg='#0B5A81').pack() 
-    Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage")).pack()
-    Label(ws, text="", bg='#0B5A81').pack() 
-    Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(ws, text="", bg='#0B5A81').pack() 
+    tkinter.Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage", customerID)).pack()
+    tkinter.Label(ws, text="", bg='#0B5A81').pack() 
+    tkinter.Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
     ##for buy entry
     f = ('Times', 14)
-    Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
-    itemid = Entry(ws, font=f)
+    tkinter.Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
+    itemid = tkinter.Entry(ws, font=f)
     itemid.pack()
-    Button(ws, text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: buy_item(itemid.get())).pack()
-    Label(ws, text="", bg='#0B5A81').pack() 
+    tkinter.Button(ws, text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: buy_item(itemid.get())).pack()
+    tkinter.Label(ws, text="", bg='#0B5A81').pack() 
 
     return
 
@@ -699,26 +791,26 @@ def SearchPage(root, cursor, customerID):
     default_category = "No option selected"
     # Category
     categories = [default_category, "Lights", "Locks"]
-    category = StringVar()
+    category = tkinter.StringVar()
     category.set(categories[0])
-    dropcat = OptionMenu(root, category, *categories)
+    dropcat = tkinter.OptionMenu(root, category, *categories)
     dropcat.pack()
 
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Light model:", bg='#0B5A81').pack()
     # Model
     lights = [default_category, "Light1", "Light2", "SmartHome1"]
-    light = StringVar()
+    light = tkinter.StringVar()
     light.set(lights[0])
-    droplight = OptionMenu(root, light, *lights)
+    droplight = tkinter.OptionMenu(root, light, *lights)
     droplight.pack()
 
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Lock model:", bg='#0B5A81').pack()
     locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
-    lock = StringVar()
+    lock = tkinter.StringVar()
     lock.set(locks[0])
-    droplock = OptionMenu(root, lock, *locks)
+    droplock = tkinter.OptionMenu(root, lock, *locks)
     droplock.pack()
 
     tkinter.Label(text="", bg='#0B5A81').pack()
@@ -731,36 +823,36 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Color:", bg='#0B5A81').pack()
     colors = [default_category, "White", "Blue", "Yellow", "Green", "Black", "White"]
-    color = StringVar()
+    color = tkinter.StringVar()
     color.set(locks[0])
-    dropcolor = OptionMenu(root, color, *colors)
+    dropcolor = tkinter.OptionMenu(root, color, *colors)
     dropcolor.pack()
     
     # Factory
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Factory:", bg='#0B5A81').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
-    factory = StringVar()
+    factory = tkinter.StringVar()
     factory.set(locks[0])
-    dropfactory = OptionMenu(root, factory, *factories)
+    dropfactory = tkinter.OptionMenu(root, factory, *factories)
     dropfactory.pack()
 
     # Power supply
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Power Supply:", bg='#0B5A81').pack()
     powersupplies = [default_category, "Battery", "USB"]
-    powersupply = StringVar()
+    powersupply = tkinter.StringVar()
     powersupply.set(locks[0])
-    droppowersupply = OptionMenu(root, powersupply, *powersupplies)
+    droppowersupply = tkinter.OptionMenu(root, powersupply, *powersupplies)
     droppowersupply.pack()
 
     # Production year
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Label(text="Select Production Year:", bg='#0B5A81').pack()
     prodyears = [default_category, "2014", "2015", "2016", "2017", "2018", "2019", "2020",]
-    prodyear = StringVar()
+    prodyear = tkinter.StringVar()
     prodyear.set(locks[0])
-    dropprodyear = OptionMenu(root, prodyear, *prodyears)
+    dropprodyear = tkinter.OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
 
     advanced_options = {'Color': color, 'Factory': factory, "PowerSupply": powersupply, "ProductionYear": prodyear}
@@ -802,7 +894,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
         search_string += "powerSupply: " + powerSupply + ", "
     if prodYear != default_category:
         search_string += "productionYear: " + prodYear + ", "
-    Label(text="Search results for {}".format(search_string[:-2]), bg='#CCCCCC', font=f).grid(row=0, column=0) 
+    tkinter.Label(text="Search results for {}".format(search_string[:-2]), bg='#CCCCCC', font=f).grid(row=0, column=0) 
 
     # display search result below
 
@@ -811,7 +903,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     columns = ('ItemID', 'Category','Model', 'Color', 'Factory', 'PowerSupply', 'PurchaseStatus', 'ProductionYear', 'Price', 'Warranty (months)')
     tree = ttk.Treeview(root, columns=columns, show = 'headings')
     for i in range(len(columns)):
-        tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=NO)
+        tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text= columns[i])
     
     
@@ -850,7 +942,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
         tree.insert("", "end", values = values)
 
     tree.grid(row=1, column=0, sticky='nsew')
-    scrollbar = ttk.Scrollbar(ws, orient=VERTICAL, command=tree.yview)
+    scrollbar = ttk.Scrollbar(ws, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
     if item_count == 0:
@@ -872,7 +964,7 @@ def itemPriceWarranty(cat, mod):
     warranty = d['Warranty (months)']
     return (price, warranty)
 
-def changepage(other):
+def changepage(other, optional=""):
     global currpage, root
     for widget in root.winfo_children():
         widget.destroy()
@@ -891,12 +983,23 @@ def changepage(other):
     elif other == "landing":
         LandingPage(root)
         currpage = "landing"
-    elif other == "customerHome":
-        currpage = "customerHome"
-        CustomerBuySearch(root, mycursor, customerID)
+    elif other == "customerHomePage":
+        CustomerHomePage(root, mycursor, optional)
+        currpage = "customerHomePage"
+    elif other == "adminHomePage":
+        AdminHomePage(root, mycursor)
+        currpage = "adminHomePage"
+    elif other == "approveHomePage":
+        ApproveHomePage(root, mycursor)
+        currpage = "approveHomePage"
+    elif other == "CustomerBuySearch":
+        CustomerBuySearch(root, mycursor, optional)
+        currpage= "CustomerBuySearch"
     elif other == "SearchPage":
+        SearchPage(root, mycursor, optional)
         currpage = "SearchPage"
-        SearchPage(root, mycursor, customerID)
+
+
 
 def executeSQL(SQLFileName, cursor):    
     with open(SQLFileName, 'r') as SQLscript:
@@ -921,7 +1024,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
@@ -929,7 +1032,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']
+mongo = client['testdb']  ##the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
