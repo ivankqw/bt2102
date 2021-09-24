@@ -688,6 +688,16 @@ def CustomerHomePage(root, cursor):
     return 
 
 def ApproveHomePage(root, cursor):
+    def approve_request():
+        selected = tree.focus()
+        temp = tree.item(selected, 'values')
+        approve = "Approved"
+        tree.item(selected, values=(temp[0], temp[1], approve, temp[3], temp[4], temp[5]))
+        sql_statement = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
+        cursor.execute(sql_statement % temp[0]) #correct, just change comma to %
+        mydb.commit() #need to commit if not mysql database would not be updated
+        messagebox.showinfo("Success! ", "You have successfully approved the following: Request ID " + temp[0]) #messagebox after everything
+
     main_screen = root    
     main_screen.title("OSHES app") 
     main_screen.config(bg='#0B5A81')  
@@ -697,10 +707,12 @@ def ApproveHomePage(root, cursor):
     selection_statement = "SELECT * FROM request WHERE requestStatus = 'In Progress'"
     cursor.execute(selection_statement)
     table_info = cursor.fetchall()
+    cursor.reset()
 
     style = ttk.Style()
     style.theme_use('default')
-    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID'), show = 'headings')
+    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID', 'Approve?'), show = 'headings')
+    tree.pack()
 
     root.title('Approval Page')
     tree.column('#1', anchor = CENTER, width = '100')
@@ -721,8 +733,8 @@ def ApproveHomePage(root, cursor):
     else:
         for i in table_info:
             tree.insert("", "end", values = i)
-        tree.pack()
-
+        tkinter.Button(text = 'Approve', command = approve_request).pack()
+        
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
     return 
@@ -775,13 +787,13 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9938580d" #password here
+MYSQL_PASSWORD = "s9935327i" #password here
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
-init_mysql(password="s9938580d") #password here
+init_mysql(password="s9935327i") #password here
 
 currpage = "landing"
 root = tkinter.Tk() 
