@@ -945,16 +945,16 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
 
-    def select():
-        ##REMOVE PREVIOUS SELECTIONS
-        for label in ws.grid_slaves():
-            if int(label.grid_info()["row"]) > 7:
-                label.grid_forget()
-        curItems = tree.selection()
-        print(curItems)
-        tkinter.Label(root, text="\n".join([str(tree.item(i)['values']) for i in curItems])).grid(row=8, column=0)
+    # def select():
+    #     ##REMOVE PREVIOUS SELECTIONS
+    #     for label in ws.grid_slaves():
+    #         if int(label.grid_info()["row"]) > 7:
+    #             label.grid_forget()
+    #     curItems = tree.selection()
+    #     print(curItems)
+    #     tkinter.Label(root, text="\n".join([str(tree.item(i)['values']) for i in curItems])).grid(row=8, column=0)
     
-    tree.bind("<Return>", lambda e: select())
+    # tree.bind("<Return>", lambda e: select())
 
     def buy_selected(selected_items):
         buy_itemIDs = []
@@ -978,7 +978,6 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     tkinter.Button(text="Back to search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
     tkinter.Button(text="Back to buy/search page", height="2", width="50", bg="#b5f09d", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
     tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=('Calibri', 20),  relief=tkinter.SOLID,command= lambda: buy_selected(tree.selection())).grid(row=6, column=0)
-    tkinter.Label(root, text="Items selected: ").grid(row=7, column=0)
 
 def getAndUpdateItem(itemID, customerID):
         updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = {}".format(itemID)
