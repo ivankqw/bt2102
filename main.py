@@ -596,7 +596,7 @@ def CustomerLoginPage(root, cursor):
 
     ws = root
     ws.title('Customer Login')
-    ws.config(bg='#0B5A81')
+    ws.config(bg='#add8e6')
 
     f = ('Times', 14)
 
@@ -643,7 +643,7 @@ def CustomerLoginPage(root, cursor):
 
     tkinter.Label(text="Welcome existing customer! :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     email_tf.grid(row=0, column=1, pady=10, padx=20)
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
@@ -692,7 +692,7 @@ def AdminLoginPage(root, cursor):
 
     ws = root
     ws.title('Administrator Login')
-    ws.config(bg='red')
+    ws.config(bg='#e6bbad')
 
     f = ('Times', 14)
 
@@ -739,7 +739,7 @@ def AdminLoginPage(root, cursor):
 
     tkinter.Label(text="Welcome existing Administrator! :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(text="", bg='red').pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     phone_tf.grid(row=0, column=1, pady=10, padx=20)
     pwd_tf.grid(row=1, column=1, pady=10, padx=20)
     login_btn.grid(row=2, column=1, pady=10, padx=20)
@@ -752,26 +752,26 @@ def AdminLoginPage(root, cursor):
 def AdminHomePage(root, cursor):
     main_screen = root
     main_screen.title("OSHES app")
-    main_screen.config(bg='#0B5A81')
+    main_screen.config(bg='#e6bbad')
     main_screen.grid()
 
     tkinter.Label(text="Welcome to Admin's Home Page :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     # uncomment end of the lines and remove pack() below when implemented these pages
     tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("inventoryHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("serviceStatusesHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("unpaidHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("approveHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,
+    tkinter.Label(text="", bg='#e6bbad').pack()
+    tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
     return
@@ -815,7 +815,7 @@ def InventoryHomePage(root, mycursor):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky="ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
                cursor='hand2', command=lambda: changepage("adminHomePage")).grid(row=2, column=0)
 
 
@@ -853,7 +853,7 @@ def ServiceStatusesPage(root, mycursor):
     scrollbar.grid(row = 1, column = 1, sticky = "ns")
 
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
 
 
 def UnpaidHomePage(root, mycursor):
@@ -889,28 +889,28 @@ def UnpaidHomePage(root, mycursor):
     tree.configure(yscroll = scrollbar.set)
     scrollbar.grid(row = 1, column = 1, sticky = "ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
+    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).grid(row = 2, column = 0)
 
 
 def CustomerHomePage(root, cursor, customerID):
     main_screen = root
     main_screen.title("OSHES app")
-    main_screen.config(bg='#0B5A81')
+    main_screen.config(bg='#add8e6')
     main_screen.grid()
 
     tkinter.Label(text="Welcome to Customer's Home Page :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     # uncomment end of the lines and remove pack() below when implemented these pages
     tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("CustomerBuySearch", customerID)).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2').pack()  # ,command= lambda: changepage("requestServiceHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2').pack()  # ,command= lambda: changepage("payServiceHomePage")).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="yellow", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
@@ -934,7 +934,7 @@ def ApproveHomePage(root, cursor):
 
     main_screen = root
     main_screen.title("OSHES app")
-    main_screen.config(bg='#0B5A81')
+    main_screen.config(bg='#e6bbad')
     main_screen.grid()
 
     tkinter.Label(text="Here are the requests waiting for approval :)",
@@ -971,8 +971,8 @@ def ApproveHomePage(root, cursor):
             tree.insert("", "end", values=i)
         tkinter.Button(text='Approve', command=approve_request).pack()
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,
+    tkinter.Label(text="", bg='#e6bbad').pack()
+    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
     return
 
@@ -1004,13 +1004,13 @@ def CustomerBuySearch(root, cursor, currCustomerID):
 
     ws = root
     ws.title('Customer - Home')
-    ws.config(bg='#0B5A81')
+    ws.config(bg='#add8e6')
     tkinter.Label(ws, text="Welcome " + customerName +
                   " [ID:" + customerID + "]", width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(ws, text="", bg='#0B5A81').pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Button(ws, text="Search for an item", height="2", width="30",
                    relief=tkinter.SOLID, command=lambda: changepage("SearchPage", customerID)).pack()
-    tkinter.Label(ws, text="", bg='#0B5A81').pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Label(ws, text="To buy, please enter Item ID",
                   width="300", height="2", font=("Calibri", 13)).pack()
     # for buy entry
@@ -1020,7 +1020,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     itemid.pack()
     tkinter.Button(ws, text="Buy", height="2", width="30",
                    relief=tkinter.SOLID, command=lambda: buy_item(itemid.get())).pack()
-    tkinter.Label(ws, text="", bg='#0B5A81').pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
 
     return
 
@@ -1031,8 +1031,8 @@ def SearchPage(root, cursor, customerID):
     ws = root
     ws.title('Choose a category!')
     # ws.wm_geometry("450x900")
-    ws.config(bg='#0B5A81')
-    tkinter.Label(text="Select category", bg='#0B5A81').pack()
+    ws.config(bg='#add8e6')
+    tkinter.Label(text="Select category", bg='#add8e6').pack()
     default_category = "No option selected"
     # Category
     categories = [default_category, "Lights", "Locks"]
@@ -1041,8 +1041,8 @@ def SearchPage(root, cursor, customerID):
     dropcat = tkinter.OptionMenu(root, category, *categories)
     dropcat.pack()
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Light model:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Light model:", bg='#add8e6').pack()
     # Model
     lights = [default_category, "Light1", "Light2", "SmartHome1"]
     light = tkinter.StringVar()
@@ -1050,23 +1050,23 @@ def SearchPage(root, cursor, customerID):
     droplight = tkinter.OptionMenu(root, light, *lights)
     droplight.pack()
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Lock model:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Lock model:", bg='#add8e6').pack()
     locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
     lock = tkinter.StringVar()
     lock.set(locks[0])
     droplock = tkinter.OptionMenu(root, lock, *locks)
     droplock.pack()
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Advanced Filter Options:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Advanced Filter Options:", bg='#add8e6').pack()
 
     # Advanced options
 
     # Colour
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Color:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Color:", bg='#add8e6').pack()
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black", "White"]
     color = tkinter.StringVar()
@@ -1075,8 +1075,8 @@ def SearchPage(root, cursor, customerID):
     dropcolor.pack()
 
     # Factory
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Factory:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Factory:", bg='#add8e6').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
     factory = tkinter.StringVar()
     factory.set(locks[0])
@@ -1084,8 +1084,8 @@ def SearchPage(root, cursor, customerID):
     dropfactory.pack()
 
     # Power supply
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Power Supply:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Power Supply:", bg='#add8e6').pack()
     powersupplies = [default_category, "Battery", "USB"]
     powersupply = tkinter.StringVar()
     powersupply.set(locks[0])
@@ -1093,8 +1093,8 @@ def SearchPage(root, cursor, customerID):
     droppowersupply.pack()
 
     # Production year
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="Select Production Year:", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Production Year:", bg='#add8e6').pack()
     prodyears = [default_category, "2014", "2015",
                  "2016", "2017", "2018", "2019", "2020", ]
     prodyear = tkinter.StringVar()
@@ -1105,11 +1105,11 @@ def SearchPage(root, cursor, customerID):
     advanced_options = {'Color': color, 'Factory': factory,
                         "PowerSupply": powersupply, "ProductionYear": prodyear}
 
-    tkinter.Label(text="", bg='#0B5A81').pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
                    command=lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options)).pack()
-    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).pack(side=tkinter.TOP)
     return
@@ -1121,7 +1121,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     ws = root
     # ws.wm_geometry("1040x450")
     ws.title('Search results')
-    ws.config(bg='#0B5A81')
+    ws.config(bg='#add8e6')
     f = ('Calibri', 13)
 
     color = advanced_options['Color'].get()
