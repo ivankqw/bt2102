@@ -893,7 +893,7 @@ def SearchPage(root, cursor, customerID):
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
-    ws.wm_geometry("450x900")
+    #ws.wm_geometry("450x900")
     ws.config(bg='#0B5A81')
     tkinter.Label(text="Select category", bg='#0B5A81').pack() 
     default_category = "No option selected"
@@ -978,7 +978,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.wm_geometry("1040x450")
+    #ws.wm_geometry("1040x450")
     ws.title('Search results')
     ws.config(bg='#0B5A81')
     f = ('Calibri', 13)
@@ -1154,6 +1154,6 @@ products = mongo.products
 
 currpage = "landing"
 root = tkinter.Tk() 
-root.wm_geometry("600x600")
+root.wm_geometry("1040x700")
 LandingPage(root)
 root.mainloop()
