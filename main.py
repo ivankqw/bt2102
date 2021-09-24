@@ -7,7 +7,7 @@ from datetime import datetime
 
 import mysql.connector
 import re
-from tkinter import ttk
+from tkinter import Tk, ttk
 from setup import init_mysql
 from pymongo import MongoClient
 
@@ -748,11 +748,11 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     for widget in root.winfo_children():
         widget.destroy()
     def getAndUpdateItem(itemID):
-        updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = '{}'".format(itemID)
+        updatePurchaseStatus = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = {}".format(itemID)
         cursor.execute(updatePurchaseStatus)
-        updateCustomerID = "UPDATE item SET customerID = {} WHERE itemID = '{}'".format(currCustomerID, itemID)
+        updateCustomerID = "UPDATE item SET customerID = {} WHERE itemID = {}".format(currCustomerID, itemID)
         cursor.execute(updateCustomerID)
-        updateDateOfPurchase = "UPDATE item SET dateOfPurchase = {} WHERE itemID = '{}'".format(datetime.today().strftime('%Y-%m-%d'), itemID)
+        updateDateOfPurchase = "UPDATE item SET dateOfPurchase = '{}' WHERE itemID = {}".format(datetime.today().strftime('%Y-%m-%d'), itemID)
         cursor.execute(updateDateOfPurchase)
         mydb.commit()
     
@@ -771,7 +771,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     ws = root
     ws.title('Customer - Home')
     ws.config(bg='#0B5A81')
-    tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
+    tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + str(currCustomerID) + "]",width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(ws, text="", bg='#0B5A81').pack() 
     tkinter.Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage", customerID)).pack()
     tkinter.Label(ws, text="", bg='#0B5A81').pack() 
@@ -783,7 +783,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
     itemid.pack()
     tkinter.Button(ws, text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: buy_item(itemid.get())).pack()
     tkinter.Label(ws, text="", bg='#0B5A81').pack() 
-
+    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID, command= lambda: changepage("customerHomePage")).pack()
     return
 
 def SearchPage(root, cursor, customerID):
@@ -876,7 +876,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.wm_geometry("1040x450")
+    ws.wm_geometry("1040x650")
     ws.title('Search results')
     ws.config(bg='#0B5A81')
     f = ('Calibri', 13)
@@ -911,7 +911,6 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text= columns[i])
-    
     
     item_count = 0
     # 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear 
@@ -951,13 +950,24 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
     scrollbar = ttk.Scrollbar(ws, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
+
+    def select():
+        ##REMOVE PREVIOUS SELECTIONS
+        for label in ws.grid_slaves():
+            if int(label.grid_info()["row"]) > 7:
+                label.grid_forget()
+        curItems = tree.selection()
+        tkinter.Label(root, text="\n".join([str(tree.item(i)['values']) for i in curItems])).grid(row=8, column=0)
+    tree.bind("<Return>", lambda e: select())
     if item_count == 0:
         tkinter.Label(text="No items matching your search.", bg='#FFFFFF').grid(row=3, column=0)
     else:
         tkinter.Label(text="Number of items in stock: " + str(item_count), bg='#FFFFFF').grid(row=3, column=0)
-
+    
     tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
     tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
+    tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="yellow", relief=tkinter.SOLID,command= lambda: print("")).grid(row=6, column=0)
+    tkinter.Label(root, text="Items selected: ").grid(row=7, column=0)
 
 def itemSold(cursor, itemID):
     # Returns true if item is sold (based on MYSQL item relation) and false otherwise
@@ -1038,7 +1048,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  ##the name of your mongodb database here
+mongo = client['Inventory']  ##the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
