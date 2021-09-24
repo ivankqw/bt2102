@@ -1,10 +1,14 @@
 import tkinter
 from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
+from tkscrolledframe import ScrolledFrame
+
 import mysql.connector
 import re
 from tkinter import ttk
 from setup import init_mysql
+from pymongo import MongoClient
+
     
 def LandingPage(root):
     main_screen = root   
@@ -677,7 +681,7 @@ def CustomerHomePage(root, cursor):
     tkinter.Label(text="Welcome to Customer's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     #uncomment end of the lines and remove pack() below when implemented these pages
-    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("buyItemsHomePage")).pack() 
+    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack(),command= lambda: changepage("CustomerBuySearch")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("requestServiceHomePage")).pack() 
     tkinter.Label(text="", bg='#0B5A81').pack()  
@@ -738,6 +742,227 @@ def ApproveHomePage(root, cursor):
     tkinter.Label(text="", bg='#0B5A81').pack()  
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
     return 
+def CustomerBuySearch(root, cursor, currCustomerID):
+    for widget in root.winfo_children():
+        widget.destroy()
+    def getAndUpdateItem(itemID):
+        update = "UPDATE item SET purchaseStatus = 'Sold' WHERE itemID = '{}'".format(itemID)
+        cursor.execute(update)
+        mydb.commit()
+    
+    def buy_item(itemID):
+        if len(itemID) != 4 or not list(items.find({"ItemID":itemID})):
+            messagebox.showerror(title="Error", message="Please enter a valid Item ID")
+        buy = messagebox.askyesno(message="You are buying item {}".format(itemID))
+        if buy:
+            if itemSold(cursor, itemID):
+                messagebox.showerror(title="Out of stock", message="Item ID {} is out of stock.".format(itemID))
+            else:
+                getAndUpdateItem(itemID)
+                messagebox.showinfo(title="Item purchased!", message="Thank you for your purchase!\nItem bought: " + itemID)
+        
+
+    ws = root
+    ws.title('Customer - Home')
+    ws.config(bg='#0B5A81')
+    Label(ws, text="Welcome " + customerName + " [ID:" + customerID + "]",width="300", height="2", font=("Calibri", 13)).pack() 
+    Label(ws, text="", bg='#0B5A81').pack() 
+    Button(ws, text="Search for an item", height="2", width="30", relief=tkinter.SOLID,command= lambda: changepage("SearchPage")).pack()
+    Label(ws, text="", bg='#0B5A81').pack() 
+    Label(ws, text="To buy, please enter Item ID", width="300", height="2", font=("Calibri", 13)).pack()
+    ##for buy entry
+    f = ('Times', 14)
+    Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
+    itemid = Entry(ws, font=f)
+    itemid.pack()
+    Button(ws, text="Buy", height="2", width="30", relief=tkinter.SOLID, command= lambda: buy_item(itemid.get())).pack()
+    Label(ws, text="", bg='#0B5A81').pack() 
+
+    return
+
+def SearchPage(root, cursor, customerID):
+    for widget in root.winfo_children():
+        widget.destroy()
+    ws = root
+    ws.title('Choose a category!')
+    ws.wm_geometry("450x900")
+    ws.config(bg='#0B5A81')
+    tkinter.Label(text="Select category", bg='#0B5A81').pack() 
+    default_category = "No option selected"
+    # Category
+    categories = [default_category, "Lights", "Locks"]
+    category = StringVar()
+    category.set(categories[0])
+    dropcat = OptionMenu(root, category, *categories)
+    dropcat.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Light model:", bg='#0B5A81').pack()
+    # Model
+    lights = [default_category, "Light1", "Light2", "SmartHome1"]
+    light = StringVar()
+    light.set(lights[0])
+    droplight = OptionMenu(root, light, *lights)
+    droplight.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Lock model:", bg='#0B5A81').pack()
+    locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
+    lock = StringVar()
+    lock.set(locks[0])
+    droplock = OptionMenu(root, lock, *locks)
+    droplock.pack()
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Advanced Filter Options:", bg='#0B5A81').pack()
+
+    ##Advanced options
+    
+    # Colour
+    
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Color:", bg='#0B5A81').pack()
+    colors = [default_category, "White", "Blue", "Yellow", "Green", "Black", "White"]
+    color = StringVar()
+    color.set(locks[0])
+    dropcolor = OptionMenu(root, color, *colors)
+    dropcolor.pack()
+    
+    # Factory
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Factory:", bg='#0B5A81').pack()
+    factories = [default_category, "Malaysia", "China", "Philippines"]
+    factory = StringVar()
+    factory.set(locks[0])
+    dropfactory = OptionMenu(root, factory, *factories)
+    dropfactory.pack()
+
+    # Power supply
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Power Supply:", bg='#0B5A81').pack()
+    powersupplies = [default_category, "Battery", "USB"]
+    powersupply = StringVar()
+    powersupply.set(locks[0])
+    droppowersupply = OptionMenu(root, powersupply, *powersupplies)
+    droppowersupply.pack()
+
+    # Production year
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="Select Production Year:", bg='#0B5A81').pack()
+    prodyears = [default_category, "2014", "2015", "2016", "2017", "2018", "2019", "2020",]
+    prodyear = StringVar()
+    prodyear.set(locks[0])
+    dropprodyear = OptionMenu(root, prodyear, *prodyears)
+    dropprodyear.pack()
+
+    advanced_options = {'Color': color, 'Factory': factory, "PowerSupply": powersupply, "ProductionYear": prodyear}
+
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Label(text="", bg='#0B5A81').pack()
+    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
+    command= lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options)).pack()
+    tkinter.Label(text="", bg='#0B5A81').pack() 
+    tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).pack(side=tkinter.TOP)
+    return
+
+
+def SimpleSearchResult(root, cursor, cat, mod, advanced_options):
+    for widget in root.winfo_children():
+        widget.destroy()
+    ws = root
+    ws.wm_geometry("1040x450")
+    ws.title('Search results')
+    ws.config(bg='#0B5A81')
+    f = ('Calibri', 13)
+
+    color = advanced_options['Color'].get()
+    factory = advanced_options['Factory'].get()
+    powerSupply = advanced_options['PowerSupply'].get()
+    prodYear = advanced_options['ProductionYear'].get()
+
+    default_category = "No option selected"
+    search_string = ""
+    if cat != default_category:
+        search_string += "Category: " + cat + ", "
+    if mod != default_category:
+        search_string += "Model: " + mod + ", "
+    if color != default_category:
+        search_string += "Color: " + color + ", "
+    if factory != default_category:
+        search_string += "Factory: " + factory + ", "
+    if powerSupply != default_category:
+        search_string += "powerSupply: " + powerSupply + ", "
+    if prodYear != default_category:
+        search_string += "productionYear: " + prodYear + ", "
+    Label(text="Search results for {}".format(search_string[:-2]), bg='#CCCCCC', font=f).grid(row=0, column=0) 
+
+    # display search result below
+
+    style = ttk.Style()
+    style.theme_use("default")
+    columns = ('ItemID', 'Category','Model', 'Color', 'Factory', 'PowerSupply', 'PurchaseStatus', 'ProductionYear', 'Price', 'Warranty (months)')
+    tree = ttk.Treeview(root, columns=columns, show = 'headings')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER, minwidth=0, width=100, stretch=NO)
+        tree.heading("#{}".format(i+1), text= columns[i])
+    
+    
+    item_count = 0
+    # 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear 
+    find_dict = {}
+    if cat != default_category:
+        find_dict['Category'] = cat
+    if mod != default_category:
+        find_dict['Model'] = mod
+    if color != default_category:
+        find_dict['Color'] = color
+    if factory != default_category:
+        find_dict['Factory'] = factory
+    if powerSupply != default_category:
+        find_dict['PowerSupply'] = powerSupply
+    if prodYear != default_category:
+        find_dict['ProductionYear'] = prodYear
+
+    for item in items.find(find_dict):
+        if itemSold(cursor, item['ItemID']):
+            continue
+        item_count += 1
+        values = (
+            item['ItemID'], 
+            item['Category'], 
+            item['Model'], 
+            item['Color'],
+            item['Factory'],
+            item['PowerSupply'],
+            item['PurchaseStatus'],
+            item['ProductionYear'],
+            itemPriceWarranty(item['Category'], item['Model'])[0],
+            itemPriceWarranty(item['Category'], item['Model'])[1]
+            )
+        tree.insert("", "end", values = values)
+
+    tree.grid(row=1, column=0, sticky='nsew')
+    scrollbar = ttk.Scrollbar(ws, orient=VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.grid(row=1, column=1, sticky='ns')
+    if item_count == 0:
+        tkinter.Label(text="No items matching your search.", bg='#FFFFFF').grid(row=3, column=0)
+    else:
+        tkinter.Label(text="Number of items in stock: " + str(item_count), bg='#FFFFFF').grid(row=3, column=0)
+
+    tkinter.Button(text="Back to Search", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: SearchPage(root,cursor, customerID)).grid(row=4, column=0)
+    tkinter.Button(text="To BUY, click here to go to buy/search page", height="2", width="50", bg="green", relief=tkinter.SOLID,cursor='hand2',command= lambda: CustomerBuySearch(root,cursor, customerID)).grid(row=5, column=0)
+
+def itemSold(cursor, itemID):
+    # Returns true if item is sold (based on MYSQL item relation) and false otherwise
+    return mysqlSelect("SELECT * from item WHERE itemID = '{}'".format(itemID), cursor)[0][4] == 'Sold'
+
+def itemPriceWarranty(cat, mod):
+    # Returns (price, warranty) of item's category and model from mongodb products collection
+    d = list(products.find({'Category':cat, 'Model':mod}))[0]
+    price = d['Price ($)']
+    warranty = d['Warranty (months)']
+    return (price, warranty)
 
 def changepage(other):
     global currpage, root
@@ -784,16 +1009,27 @@ def mysqlSelect(command, cursor):
     result = cursor.fetchall()
     return result
 
+# Global variables
 
+customerName = ""
+customerID = ""
+
+# Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9935327i" #password here
+MYSQL_PASSWORD = "Valentin1" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
 mycursor = mydb.cursor(buffered=True)
 
-init_mysql(password="s9935327i") #password here
+# Connect MongoDB
+client = MongoClient()
+mongo = client['Inventory']
+items = mongo.items
+products = mongo.products
+
+#init_mysql()
 
 currpage = "landing"
 root = tkinter.Tk() 
