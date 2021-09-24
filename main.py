@@ -4,7 +4,9 @@ import tkinter.messagebox as messagebox
 import mysql.connector
 import re
 from setup import init_mysql
-    
+from tkinter import *
+from tkinter import ttk
+
 def LandingPage(root):
     main_screen = root   
     main_screen.title("OSHES app")
@@ -554,93 +556,132 @@ def CustomerLoginPage(root, cursor):
     return 
 
 def AdminLoginPage(root, cursor):
-    def validate_login_a():
-        check_counter=0
-        warn = ""
-        if phone_tf.get() == "":
-            warn += "\n"
-            warn += "Please enter a phone number!"
-        else:
-            check_counter += 1
-        if pwd_tf.get() == "":
-            warn += "\n"
-            warn += "Please enter a password!"
-        else:
-            check_counter += 1
-        
-        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE phoneNumber = %s AND adminPassword = %s"
-        
-        if check_counter == 2:
-            try:
-                cursor.execute(selection_statement,(phone_tf.get(), pwd_tf.get()))
-                row = cursor.fetchone()
-                if row == None:
-                    messagebox.showinfo('Error', 'Invalid Phone Number and/or Password')
-                else:
-                    adminID = row[0]
-                    adminName = row[1]
-                    messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !")
-                    cursor.reset()
-            except Exception as e:
-                messagebox.showerror('Error', e)
-        else:
-            messagebox.showerror('Error', warn)
+"""
+##Inventory
 
-    ws = root
-    ws.title('Administrator Login')
-    ws.config(bg='red')
+    sql1 = "SELECT A.productID, A.Sold, B.Unsold \
+    FROM (SELECT productID, COUNT(purchaseStatus) as Sold \
+    FROM item \
+    WHERE purchaseStatus = 'Sold' \
+    GROUP by productID) AS A \
+    CROSS JOIN(SELECT productID, COUNT(purchaseStatus) as Unsold \
+    FROM item \
+    WHERE purchaseStatus = 'Unsold' \
+    GROUP by productID) AS B \
+    ON A.productID = B.productID"
+    mycursor.execute(sql1)
+    myresult = mycursor.fetchall()
 
-    f = ('Times', 14)
+    Label(text="Items under service", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
 
-    left_frame = tkinter.Frame(
-        ws, 
-        bd=2, 
-        bg='#CCCCCC',   
-        relief=tkinter.SOLID, 
-        padx=10, 
-        pady=10
-        )
 
-    tkinter.Label(
-        left_frame, 
-        text="Enter your Phone Number", 
-        bg='#CCCCCC',
-        font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('IID','Number of SOLD items', 'Number of UNSOLD items'), show = 'headings')
+    
+    root.title('Inventory')
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'IID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Number of SOLD items')
+    tree.column("#3", anchor = CENTER, width = 195)
+    tree.heading('#3', text = 'Number of UNSOLD items')
 
-    tkinter.Label(
-        left_frame, 
-        text="Enter your Password", 
-        bg='#CCCCCC',
-        font=f
-        ).grid(row=1, column=0, pady=10)
 
-    phone_tf = tkinter.Entry(
-        left_frame, 
-        font=f
-        )
-    pwd_tf = tkinter.Entry(
-        left_frame, 
-        font=f,
-        show='*'
-        )
-    login_btn = tkinter.Button(
-        left_frame, 
-        width=15, 
-        text='Login', 
-        font=f, 
-        relief=tkinter.SOLID,
-        cursor='hand2',
-        command=validate_login_a
-        )
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
 
-    tkinter.Label(text="Welcome existing Administrator! :)", width="300", height="2", font=("Calibri", 13)).pack()
-    tkinter.Label(text="", bg='red').pack()
-    phone_tf.grid(row=0, column=1, pady=10, padx=20)
-    pwd_tf.grid(row=1, column=1, pady=10, padx=20)
-    login_btn.grid(row=2, column=1, pady=10, padx=20)
-    left_frame.pack()
-    tkinter.Button(text="Back to Home", height="2", width="30", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
-    return 
+    scrollbar = ttk.Scrollbar(root, orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+
+    Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).grid(row = 2, column = 0)
+
+
+##Service status
+
+    sql2 = "SELECT itemID,productID,serviceStatus FROM item\
+    WHERE serviceStatus = 'In progress' OR serviceStatus = 'Waiting for approval'\
+    UNION\
+    SELECT 'Total items under service', '', COUNT(*) FROM item\
+    WHERE serviceStatus = 'In progress' OR serviceStatus = 'Waiting for approval'\
+    ORDER by itemID"
+
+
+
+
+    mycursor.execute(sql2)
+    myresult = mycursor.fetchall()
+
+    Label(text="Items under service", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
+
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('Item ID','Product ID', 'Service Status'), show = 'headings')
+    
+    root.title('Items under service')
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'Item ID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Product ID')
+    tree.column("#3", anchor = CENTER, width = 195)
+    tree.heading('#3', text = 'Service Status')
+
+
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
+
+    scrollbar = ttk.Scrollbar(root, orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+
+    Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).grid(row = 2, column = 0)
+
+##Unpaid customers
+
+    sql3 = "\
+    SELECT customerID, itemID, requestID from request\
+    WHERE requestStatus = 'Submitted and Waiting for payment' \
+    UNION \
+    SELECT 'Total no. of unpaid customers', '', count(*) from request \
+    WHERE requestStatus = 'Submitted and Waiting for payment'"
+
+    mycursor.execute(sql3)
+    myresult = mycursor.fetchall()
+
+    Label(text="Customers with unpaid service fees", width = 30, height="2", font=("Calibri", 13)).grid(row = 0, column = 0)
+
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=('Customer ID','Item ID', 'Request ID'), show = 'headings')
+    
+    root.title("Customers with unpaid service fees")
+    tree.column("#1", anchor = CENTER, width = 195)
+    tree.heading('#1', text = 'Customer ID')
+    tree.column("#2", anchor = CENTER, width = 195)
+    tree.heading('#2', text = 'Item ID')
+    tree.column("#3", anchor = CENTER, width = 195)
+    tree.heading('#3', text = 'Request ID')
+
+
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
+
+    scrollbar = ttk.Scrollbar(orient = tkinter.VERTICAL)
+    tree.configure(yscroll = scrollbar.set)
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+
+
+    Button(text="Back to Admin", height="2", width="20", bg="yellow", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).grid(row = 2, column = 0)
+"""
+
 
 def changepage(other):
     global currpage, root
@@ -680,7 +721,7 @@ def mysqlSelect(command, cursor):
 
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root" #your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Juhi123#" #your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(host=MYSQL_HOST,user=MYSQL_USER,password=MYSQL_PASSWORD,database=MYSQL_DATABASE)
