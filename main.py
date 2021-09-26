@@ -680,7 +680,7 @@ def AdminLoginPage(root, cursor):
                     adminName = row[1]
                     messagebox.showinfo("Logged in successfully. ", "Welcome, " + adminName + " !") 
                     cursor.reset()
-                    changepage("adminHomePage")
+                    changepage("adminHomePage", adminID)
             except Exception as e:
                 messagebox.showerror('Error', e)
         else:
@@ -745,7 +745,7 @@ def AdminLoginPage(root, cursor):
     return
 
 
-def AdminHomePage(root, cursor):
+def AdminHomePage(root, cursor, adminID):
     main_screen = root
     main_screen.title("OSHES app")
     main_screen.config(bg='#e6bbad')
@@ -765,7 +765,7 @@ def AdminHomePage(root, cursor):
                    cursor='hand2', command=lambda: changepage("unpaidHomePage")).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("approveHomePage")).pack()
+                   cursor='hand2', command=lambda: changepage("approveHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
@@ -902,7 +902,7 @@ def CustomerHomePage(root, cursor, customerID):
                    cursor='hand2', command=lambda: changepage("CustomerBuySearch", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2').pack()  # ,command= lambda: changepage("requestServiceHomePage")).pack()
+                   cursor='hand2').pack()  #,command= lambda: changepage("requestServiceHomePage")).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2').pack()  # ,command= lambda: changepage("payServiceHomePage")).pack()
@@ -912,117 +912,24 @@ def CustomerHomePage(root, cursor, customerID):
 
     return
 
-
-def ApproveHomePage(root, cursor):
-    def approve_request():
-        selected = tree.focus()
-        temp = tree.item(selected, 'values')
-        approve = "Approved"
-        tree.item(selected, values=(
-            temp[0], temp[1], approve, temp[3], temp[4], temp[5]))
-        sql_statement = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
-        # correct, just change comma to %
-        cursor.execute(sql_statement % temp[0])
-        mydb.commit()  # need to commit if not mysql database would not be updated
-        # messagebox after everything
-        messagebox.showinfo(
-            "Success! ", "You have successfully approved the following: Request ID " + temp[0])
-
-    main_screen = root
-    main_screen.title("OSHES app")
-    main_screen.config(bg='#e6bbad')
-    main_screen.grid()
-
-    tkinter.Label(text="Here are the requests waiting for approval :)",
-                  width="300", height="2", font=("Calibri", 13)).pack()
-    selection_statement = "SELECT * FROM request WHERE requestStatus = 'In Progress'"
-    cursor.execute(selection_statement)
-    table_info = cursor.fetchall()
-    cursor.reset()
-
-    style = ttk.Style()
-    style.theme_use('default')
-    tree = ttk.Treeview(root, columns=('Request ID', 'Date of Request', 'Request Status',
-                        'Customer ID', 'Admin ID', 'Item ID', 'Approve?'), show='headings')
-    tree.pack()
-
-    root.title('Approval Page')
-    tree.column('#1', anchor=CENTER, width='100')
-    tree.heading('#1', text='Request ID')
-    tree.column('#2', anchor=CENTER, width='100')
-    tree.heading('#2', text='Date of Request')
-    tree.column('#3', anchor=CENTER, width='100')
-    tree.heading('#3', text='Request Status')
-    tree.column('#4', anchor=CENTER, width='100')
-    tree.heading('#4', text='Customer ID')
-    tree.column('#5', anchor=CENTER, width='100')
-    tree.heading('#5', text='Admin ID')
-    tree.column('#6', anchor=CENTER, width='100')
-    tree.heading('#6', text='Item ID')
-
-    if table_info == []:
-        messagebox.showinfo('Good news!', 'No requests waiting to be approved')
-    else:
-        for i in table_info:
-            tree.insert("", "end", values=i)
-        tkinter.Button(text='Approve', command=approve_request).pack()
-
-    tkinter.Label(text="", bg='#e6bbad').pack()
-    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
-    return
-
-
-def AdminHomePage(root, cursor): 
-    main_screen = root    
-    main_screen.title("OSHES app") 
-    main_screen.config(bg='#e6bbad')  
-    main_screen.grid() 
-     
-    tkinter.Label(text="Welcome to Admin's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
-    tkinter.Label(text="", bg='#e6bbad').pack()  
-    #uncomment end of the lines and remove pack() below when implemented these pages
-    tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("inventoryHomePage")).pack() 
-    tkinter.Label(text="", bg='#e6bbad').pack()  
-    tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("serviceStatusesHomePage")).pack() 
-    tkinter.Label(text="", bg='#e6bbad').pack()  
-    tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("unpaidHomePage")).pack() 
-    tkinter.Label(text="", bg='#e6bbad').pack()  
-    tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("approveHomePage")).pack() 
-    tkinter.Label(text="", bg='#e6bbad').pack()  
-    tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
-
-    return 
- 
-def CustomerHomePage(root, cursor, customerID): 
-    main_screen = root    
-    main_screen.title("OSHES app") 
-    main_screen.config(bg='#add8e6')  
-    main_screen.grid() 
-     
-    tkinter.Label(text="Welcome to Customer's Home Page :)", width="300", height="2", font=("Calibri", 13)).pack() 
-    tkinter.Label(text="", bg='#add8e6').pack()  
-    #uncomment end of the lines and remove pack() below when implemented these pages
-    tkinter.Button(text="Buy Items", height="2", width="30", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("CustomerBuySearch", customerID)).pack() 
-    tkinter.Label(text="", bg='#add8e6').pack()  
-    tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("requestServiceHomePage")).pack() 
-    tkinter.Label(text="", bg='#add8e6').pack()  
-    tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,cursor='hand2').pack() #,command= lambda: changepage("payServiceHomePage")).pack()
-    tkinter.Label(text="", bg='#add8e6').pack()  
-    tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
-
+def approveAndUpdateRequestStatusAndTagAdminID(requestID, adminID):
+    updateRequestStatus = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
+    mycursor.execute(updateRequestStatus % requestID)
+    updateAdminID = "UPDATE request SET adminID = %s WHERE requestID = %s"
+    mycursor.execute(updateAdminID, (adminID, requestID))
+    mydb.commit()
     return 
 
-def ApproveHomePage(root, cursor):
-    def approve_request():
-        selected = tree.focus()
-        temp = tree.item(selected, 'values')
-        approve = "Approved"
-        tree.item(selected, values=(temp[0], temp[1], approve, temp[3], temp[4], temp[5]))
-        sql_statement = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
-        cursor.execute(sql_statement % temp[0]) #correct, just change comma to %
-        mydb.commit() #need to commit if not mysql database would not be updated
-        messagebox.showinfo("Success! ", "You have successfully approved the following: Request ID " + temp[0]) #messagebox after everything
+def ApproveHomePage(root, cursor, adminID):
+    #def approve_request():
+    #   selected = tree.focus()
+    #   temp = tree.item(selected, 'values')
+    #   approve = "Approved"
+    #   tree.item(selected, values=(temp[0], temp[1], approve, temp[3], temp[4], temp[5]))
+    #   sql_statement = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
+    #   cursor.execute(sql_statement % temp[0]) #correct, just change comma to %
+    #   mydb.commit() #need to commit if not mysql database would not be updated
+    #   messagebox.showinfo("Success! ", "You have successfully approved the following: Request ID " + temp[0]) #messagebox after everything
 
     main_screen = root    
     main_screen.title("OSHES app") 
@@ -1037,7 +944,7 @@ def ApproveHomePage(root, cursor):
 
     style = ttk.Style()
     style.theme_use('default')
-    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID', 'Approve?'), show = 'headings')
+    tree = ttk.Treeview(root, columns = ('Request ID', 'Date of Request', 'Request Status', 'Customer ID', 'Admin ID', 'Item ID'), show = 'headings')
     tree.pack()
 
     root.title('Approval Page')
@@ -1054,12 +961,24 @@ def ApproveHomePage(root, cursor):
     tree.column('#6', anchor = CENTER, width = '100')
     tree.heading('#6', text = 'Item ID')
 
+    def approve_selected(selected_requests):
+        approve_requestIDs = []
+        for i in selected_requests:
+            requestId = tree.item(i)['values'][0]
+            approve_requestIDs.append(requestId)
+        approveall = messagebox.askyesno(title="Confirm Approval", message="Click Yes to confirm approval of the following requests: \n\n{}".format(approve_requestIDs))
+        if approveall:
+            for i in approve_requestIDs:
+                approveAndUpdateRequestStatusAndTagAdminID(i, adminID)
+            messagebox.showinfo(title="Requests Approved", message="Requests successfully approved. Thank you!")
+            changepage("approveHomePage")
+
     if table_info == []:
         messagebox.showinfo('Good news!', 'No requests waiting to be approved')
     else:
         for i in table_info:
             tree.insert("", "end", values = i)
-        tkinter.Button(text = 'Approve', command = approve_request).pack()
+        tkinter.Button(text="Approve Selected Requests", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=('Calibri', 20),  relief=tkinter.SOLID,command= lambda: approve_selected(tree.selection())).pack()
         
     tkinter.Label(text="", bg='#e6bbad').pack()  
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,cursor='hand2',command= lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
@@ -1355,10 +1274,10 @@ def changepage(other, optional=""):
         CustomerHomePage(root, mycursor, optional)
         currpage = "customerHomePage"
     elif other == "adminHomePage":
-        AdminHomePage(root, mycursor)
+        AdminHomePage(root, mycursor, optional)
         currpage = "adminHomePage"
     elif other == "approveHomePage":
-        ApproveHomePage(root, mycursor)
+        ApproveHomePage(root, mycursor, optional)
         currpage = "approveHomePage"
     elif other == "CustomerBuySearch":
         CustomerBuySearch(root, mycursor, optional)
@@ -1399,7 +1318,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9938580d"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1408,7 +1327,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
