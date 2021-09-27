@@ -53,7 +53,7 @@ CREATE TABLE Request(
     requestDate         DATE            NOT NULL,
     requestStatus       VARCHAR(255)    NOT NULL,
     customerID      	INT             NOT NULL,
-    adminID             INT             NOT NULL,
+    adminID             INT             ,
     itemID              INT             NOT NULL,
     PRIMARY KEY (requestID),
     FOREIGN KEY (customerID) REFERENCES Customer(customerID),
