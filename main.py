@@ -1500,7 +1500,7 @@ def PayRequests(root, cursor, customerID):
                 
             messagebox.showinfo(
                 title="Requests paid", message="Requests successfully paid. Thank you!")
-            
+            changepage('payServiceHomePage', customerID)
 
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
                 relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=6, column=0)
