@@ -85,9 +85,22 @@ def products_info_to_sql(password):
 
     products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
 
+#fake data for request -> payment testing purposes
+def init_fake(host='localhost',user='root',password=''):
+    mydb = mysql.connector.connect(host=host,user=user,passwd=password,database="oshes")
+    mycursor = mydb.cursor()
+    
+    with open('FakeItemData.sql', 'r') as SQLscript:
+        SQLcommands = SQLscript.read().split(';')
+        for command in SQLcommands:
+            mycursor.execute(command)
+            
+    mydb.close()
+
 #create_db_mysql(password='')
 #init_mysql(password="root")
 #items_info_to_sql(password="root")
 #products_info_to_sql(password="root")
+init_fake(password="root")
 
 

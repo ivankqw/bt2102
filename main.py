@@ -1306,13 +1306,16 @@ def CustomerRequestPage(root, cursor, customerID):
         dateOfPurchase = itemsToRequest[i][2]
         d = list(products.find({"ProductID": productID}))[0]
         warranty = d['Warranty (months)']
+        cost = d['Cost ($)']
+        serviceFee = 40 * 0.2 * int(cost)
         itemsToRequest[i] = (productID, itemID, dateOfPurchase,
-                             warranty, isPastWarranty(dateOfPurchase, warranty))
+                             warranty, isPastWarranty(dateOfPurchase, warranty),
+                             serviceFee if isPastWarranty(dateOfPurchase, warranty) else 0)
 
     style = ttk.Style()
     style.theme_use("default")
     columns = ('productID', 'itemID', 'dateOfPurchase',
-               "Warranty (months)", 'itemPastWarranty')
+               "Warranty (months)", 'itemPastWarranty' , 'serviceFee')
     tree = ttk.Treeview(root, columns=columns, show='headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
@@ -1340,17 +1343,18 @@ def CustomerRequestPage(root, cursor, customerID):
         for i in selected_items:
             itemId = tree.item(i)['values'][1]
             itemPastWarranty = tree.item(i)['values'][4]
-            req_info.append((itemId, itemPastWarranty))
+            serviceFee = tree.item(i)['values'][5]
+            req_info.append((itemId, itemPastWarranty, serviceFee))
             displayItems.append(itemId)
 
         reqall = messagebox.askyesno(
             title="Confirm Request", message="Click Yes to confirm request of the following items: \n\n{}".format(displayItems))
         if reqall:
             for i in range(len(req_info)):
-                pred = True if req_info[i][1] == "True" else False 
-                if pred:
+                itemPastWarranty = True if req_info[i][1] == "True" else False 
+                if itemPastWarranty:
                     pay = True
-                getAndRequestItem(req_info[i][0], customerID, pred)
+                getAndRequestItem(req_info[i][0], customerID, itemPastWarranty, req_info[i][2])
             if pay:
                 yesPay = messagebox.askyesno(
                     title = "Pay up!!!",
@@ -1365,17 +1369,33 @@ def CustomerRequestPage(root, cursor, customerID):
 def isPastWarranty(dateOfPurchase, warranty):
     return (datetime.datetime.today().date() - dateOfPurchase).days > warranty * 30
 
-def getAndRequestItem(itemID, customerID, itemPastWarranty):
+def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     status = "Submitted and Waiting for payment" if itemPastWarranty else "Submitted"
     makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
     mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
+
+    if itemPastWarranty:
+        getReqID = "SELECT requestID FROM request WHERE customerID = %s AND itemID = %s"
+        mycursor.execute(getReqID, (customerID, itemID))
+        reqID = mycursor.fetchone()[0]
+        createServiceFee = "INSERT INTO servicefee (requestID, creationDate, feeAmount) VALUES (%s, %s, %s)"
+        mycursor.execute(createServiceFee, (reqID, datetime.datetime.today().strftime('%Y-%m-%d'), serviceFee))
+
     updateItem = "UPDATE item SET serviceStatus = 'Waiting for approval' WHERE itemID = %s"
     mycursor.execute(updateItem, (itemID,))
     mydb.commit()
 
 def getAndCancelRequest(requestID):
+    #change the serviceStatus of the item back to ""
+    getItemID = "SELECT itemID from request where requestID = %s"
+    mycursor.execute(getItemID, (requestID,))
+    itemID = mycursor.fetchone()[0]
+    updateItem = "UPDATE item SET servicestatus = %s where itemid = %s"
+    mycursor.execute(updateItem, ("", itemID))
+    #delete the request
     del_statement = "DELETE from request where requestID = %s"
     mycursor.execute(del_statement, (requestID,))
+
     mydb.commit()
 
 def getAndUpdateItem(itemID, customerID):
