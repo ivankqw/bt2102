@@ -935,7 +935,7 @@ def ApproveHomePage(root, cursor, adminID):
 
     tkinter.Label(text="Here are the requests waiting for approval :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    selection_statement = "SELECT * FROM request WHERE requestStatus = 'Submitted'"
+    selection_statement = "SELECT * FROM request WHERE requestStatus = 'Submitted' OR requestStatus = 'In progress'"
     cursor.execute(selection_statement)
     table_info = cursor.fetchall()
     cursor.reset()
@@ -1449,7 +1449,7 @@ def PayRequests(root, cursor, customerID):
     requestsToPaySQL = (
         "SELECT r.requestID, requestDate, requestStatus, itemID, feeAmount "
         "FROM servicefee sf LEFT JOIN request r ON sf.requestID = r.requestID "
-        "WHERE customerID = {}"
+        "WHERE customerID = {} and requestStatus = 'Submitted and Waiting for payment'"
     ).format(customerID)
     cursor.execute(requestsToPaySQL)
     requestsToPay = cursor.fetchall()
@@ -1620,7 +1620,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Valentin1"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1629,7 +1629,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
