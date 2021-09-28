@@ -738,13 +738,13 @@ def AdminHomePage(root, cursor, adminID):
     tkinter.Label(text="", bg='#e6bbad').pack()
     # uncomment end of the lines and remove pack() below when implemented these pages
     tkinter.Button(text="Inventory", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("inventoryHomePage")).pack()
+                   cursor='hand2', command=lambda: changepage("inventoryHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Service Statuses", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("serviceStatusesHomePage")).pack()
+                   cursor='hand2', command=lambda: changepage("serviceStatusesHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("unpaidHomePage")).pack()
+                   cursor='hand2', command=lambda: changepage("unpaidHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("approveHomePage", adminID)).pack()
@@ -752,10 +752,11 @@ def AdminHomePage(root, cursor, adminID):
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
+
     return
 
 
-def InventoryHomePage(root, mycursor):
+def InventoryHomePage(root, mycursor, adminID):
     sql1 = "SELECT A.productID, A.Sold, B.Unsold \
     FROM (SELECT productID, COUNT(purchaseStatus) as Sold \
     FROM item \
@@ -794,10 +795,10 @@ def InventoryHomePage(root, mycursor):
     scrollbar.grid(row=1, column=1, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage")).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
 
 
-def ServiceStatusesPage(root, mycursor):
+def ServiceStatusesPage(root, mycursor, adminID):
     sql2 = "SELECT itemID,productID,serviceStatus FROM item\
     WHERE serviceStatus = 'In progress' OR serviceStatus = 'Waiting for approval'\
     UNION\
@@ -833,10 +834,10 @@ def ServiceStatusesPage(root, mycursor):
     scrollbar.grid(row=1, column=1, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage")).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
 
 
-def UnpaidHomePage(root, mycursor):
+def UnpaidHomePage(root, mycursor, adminID):
     sql3 = "\
     SELECT customerID, itemID, requestID from request\
     WHERE requestStatus = 'Submitted and Waiting for payment' \
@@ -872,7 +873,7 @@ def UnpaidHomePage(root, mycursor):
     scrollbar.grid(row=1, column=1, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage")).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
 
 
 def CustomerHomePage(root, cursor, customerID):
@@ -985,7 +986,7 @@ def ApproveHomePage(root, cursor, adminID):
 
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage")).pack(side=tkinter.BOTTOM)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).pack(side=tkinter.BOTTOM)
     return
 
 
@@ -1299,7 +1300,7 @@ def CustomerCancelRequestPage(root, cursor, customerID):
     tree = ttk.Treeview(root, columns=columns, show='headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
-                    minwidth=0, width=100, stretch=tkinter.NO)
+                    minwidth=0, width=150, stretch=tkinter.YES)
         tree.heading("#{}".format(i+1), text=columns[i])
 
     for item in reqToCancel:
@@ -1337,13 +1338,8 @@ def CustomerRequestPage(root, cursor, customerID):
     f = ('Calibri', 13)
     tkinter.Label(text="Items that I can make Requests for :)",
                   bg='#CCCCCC', font=f).grid(row=0, column=0)
-    itemsToRequestSQL = "SELECT i.productID, i.itemID, i.dateOfPurchase, i.itemid, requestid\
-                        FROM item i left join request re on re.itemid = i.itemid\
-                        where i.customerid = %s\
-                        AND ((serviceStatus = %s)\
-                        OR (requestStatus = %s))\
-                        AND NOT EXISTS (SELECT itemID from request rq WHERE i.itemID = rq.itemID)"
-    cursor.execute(itemsToRequestSQL, (customerID, "", "Canceled"))
+    itemsToRequestSQL = "SELECT productID, i.itemID, dateOfPurchase FROM item i left join request re on re.itemid = i.itemid and re.customerid = i.customerid where i.customerid = %s and (servicestatus = %s and (requeststatus != 'Submitted and Waiting for payment' or requeststatus is null))"
+    cursor.execute(itemsToRequestSQL, (customerID, ""))
     itemsToRequest = cursor.fetchall()
     for i in range(len(itemsToRequest)):
         itemID = itemsToRequest[i][1]
@@ -1592,11 +1588,11 @@ def changepage(other, optional=""):
         SearchPage(root, mycursor, optional)
         currpage = "SearchPage"
     elif other == "inventoryHomePage":
-        InventoryHomePage(root, mycursor)
+        InventoryHomePage(root, mycursor, optional)
     elif other == "serviceStatusesHomePage":
-        ServiceStatusesPage(root, mycursor)
+        ServiceStatusesPage(root, mycursor, optional)
     elif other == "unpaidHomePage":
-        UnpaidHomePage(root, mycursor)
+        UnpaidHomePage(root, mycursor, optional)
     elif other == "customerRequestPage":
         CustomerRequestPage(root, mycursor, optional)
     elif other == "customerCancelRequestPage":
