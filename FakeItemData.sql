@@ -12,4 +12,4 @@ values (2002, 7, NULL, 1, 'Sold', '', '2020-09-28');
 INSERT INTO item (itemid, productid, adminid, customerid, purchasestatus, servicestatus, dateofpurchase) 
 values (2003, 7, NULL, 1, 'Sold', '', '2020-09-28');
 INSERT INTO item (itemid, productid, adminid, customerid, purchasestatus, servicestatus, dateofpurchase) 
-values (2004, 7, NULL, 1, 'Sold', '', '2020-09-28')
+values (2004, 7, NULL, 1, 'Sold', '', '2020-09-28');

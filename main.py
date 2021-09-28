@@ -876,6 +876,7 @@ def UnpaidHomePage(root, mycursor):
 
 
 def CustomerHomePage(root, cursor, customerID):
+    cancelInvalidRequests()
     main_screen = root
     main_screen.title("OSHES app")
     main_screen.config(bg='#add8e6')
@@ -1508,9 +1509,14 @@ def PayRequests(root, cursor, customerID):
         'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=5, column=0)
 
 
-def deleteInvalidRequests():
+def cancelInvalidRequests():
     #payment of service fees must be made within 10 days from request date 
+    updateStatement = "update request re\
+         right join servicefee se on (re.requestid = se.requestid)\
+         set re.requestStatus = 'Canceled'\
+         where (date_add(creationdate, interval 10 day) < current_date())"
     #if service fees are not made by the due date, the request will be canceled automatically
+    mycursor.execute(updateStatement)
     return
 
 
