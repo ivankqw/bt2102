@@ -1337,9 +1337,13 @@ def CustomerRequestPage(root, cursor, customerID):
     f = ('Calibri', 13)
     tkinter.Label(text="Items that I can make Requests for :)",
                   bg='#CCCCCC', font=f).grid(row=0, column=0)
-    itemsToRequestSQL = "SELECT productID, itemID, dateOfPurchase FROM item i WHERE customerID = %s AND serviceStatus = %s\
-                         AND NOT EXISTS (SELECT itemID from request rq WHERE i.itemID = rq.itemID)"
-    cursor.execute(itemsToRequestSQL, (customerID, ""))
+    itemsToRequestSQL = "SELECT i.productID, i.itemID, i.dateOfPurchase, i.itemid, requestid\
+                        FROM item i left join request re on re.itemid = i.itemid\
+                        where i.customerid = %s\
+                        AND ((serviceStatus = %s)\
+                        OR (requestStatus = %s))\
+                        AND NOT EXISTS (SELECT itemID from request rq WHERE i.itemID = rq.itemID)"
+    cursor.execute(itemsToRequestSQL, (customerID, "", "Canceled"))
     itemsToRequest = cursor.fetchall()
     for i in range(len(itemsToRequest)):
         itemID = itemsToRequest[i][1]

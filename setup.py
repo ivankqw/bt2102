@@ -103,6 +103,6 @@ def init_fake(host='localhost',user='root',password=''):
 #init_mysql(password="root")
 #items_info_to_sql(password="root")
 #products_info_to_sql(password="root")
-#init_fake(password="Valentin1")
+#init_fake(password="root")
 
 
