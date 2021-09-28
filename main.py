@@ -1385,6 +1385,11 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     mycursor.execute(updateItem, (itemID,))
     mydb.commit()
 
+def deleteInvalidRequests():
+    #payment of service fees must be made within 10 days from request date 
+    #if service fees are not made by the due date, the request will be canceled automatically
+    return
+
 def getAndCancelRequest(requestID):
     #change the serviceStatus of the item back to ""
     getItemID = "SELECT itemID from request where requestID = %s"
