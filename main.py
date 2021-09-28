@@ -910,13 +910,21 @@ def CustomerHomePage(root, cursor, customerID):
     return
 
 
-def approveAndUpdateRequestStatusAndTagAdminID(requestID, adminID):
-    updateRequestStatus = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s"
-    mycursor.execute(updateRequestStatus % requestID)
-    updateAdminID = "UPDATE request SET adminID = %s WHERE requestID = %s"
-    mycursor.execute(updateAdminID, (adminID, requestID))
-    mydb.commit()
-    return
+def approveAndUpdateRequestStatusAndTagAdminID(requestID, adminID, itemID): 
+    updateRequestStatus = "UPDATE request SET requestStatus = 'Approved' WHERE requestID = %s and itemID = %s" 
+    mycursor.execute(updateRequestStatus, (requestID, itemID)) 
+    #tag adminID to requestID for request table 
+    updateAdminID1 = "UPDATE request SET adminID = %s WHERE itemID = %s" 
+    mycursor.execute(updateAdminID1, (adminID, itemID)) 
+    #tag adminID in item table, not just request table 
+    updateAdminID2 = "UPDATE item SET adminID = %s WHERE itemID = %s" 
+    mycursor.execute(updateAdminID2, (adminID, itemID)) 
+    #now item table will have admin id correspond to item id, then update servicestatus  
+    updateServiceStatus = "UPDATE item SET serviceStatus = 'In Progress' WHERE itemID = %s AND adminID = %s" 
+    mycursor.execute(updateServiceStatus, (itemID, adminID)) 
+    mydb.commit() 
+    return 
+
 
 
 def ApproveHomePage(root, cursor, adminID):
@@ -961,19 +969,23 @@ def ApproveHomePage(root, cursor, adminID):
     tree.heading('#5', text='Admin ID')
     tree.column('#6', anchor=CENTER, width='100')
     tree.heading('#6', text='Item ID')
-
-    def approve_selected(selected_requests):
-        approve_requestIDs = []
-        for i in selected_requests:
-            requestId = tree.item(i)['values'][0]
-            approve_requestIDs.append(requestId)
-        approveall = messagebox.askyesno(
-            title="Confirm Approval", message="Click Yes to confirm approval of the following requests: \n\n{}".format(approve_requestIDs))
-        if approveall:
-            for i in approve_requestIDs:
-                approveAndUpdateRequestStatusAndTagAdminID(i, adminID)
-            messagebox.showinfo(
-                title="Requests Approved", message="Requests successfully approved. Thank you!")
+     
+    def approve_selected(selected_requests): 
+        approve_info = []  
+        displayItems = [] 
+        for i in selected_requests: 
+            requestId = tree.item(i)['values'][0] 
+            itemId = tree.item(i)['values'][5] 
+            approve_info.append((requestId, itemId)) 
+            displayItems.append(requestId) 
+ 
+        approveall = messagebox.askyesno( 
+            title="Confirm Approval", message="Click Yes to confirm approval of the following requests: \n\n{}".format(displayItems)) 
+        if approveall: 
+            for i in range(len(approve_info)): 
+                approveAndUpdateRequestStatusAndTagAdminID(approve_info[i][0], adminID, approve_info[i][1]) 
+            messagebox.showinfo( 
+                title="Requests Approved", message="Requests successfully approved. Thank you!") 
             changepage("approveHomePage")
 
     if table_info == []:
@@ -1626,7 +1638,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9935327i"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1635,7 +1647,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
