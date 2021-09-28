@@ -891,6 +891,9 @@ def CustomerHomePage(root, cursor, customerID):
     tkinter.Button(text="Request for Item Service", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("customerRequestPage", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Button(text="My Requests", height="2", width="30", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("customerAllRequestPage", customerID)).pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Cancel a Request", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("customerCancelRequestPage", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
@@ -1241,15 +1244,45 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
         'Calibri', 20),  relief=tkinter.SOLID, command=lambda: buy_selected(tree.selection(), customerID)).grid(row=6, column=0)
 
+def CustomerAllRequestsPage(root, cursor, customerID):
+    root.title("Customer Request Page")
+    f = ('Calibri', 13)
+    tkinter.Label(text="All my Requests :)",
+                  bg='#CCCCCC', font=f).grid(row=0, column=0)
+    reqSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s"
+    cursor.execute(reqSQL, (customerID,))
+    req = cursor.fetchall()
+
+    style = ttk.Style()
+    style.theme_use("default")
+    columns = ('requestID', 'requestDate', 'requestStatus')
+    tree = ttk.Treeview(root, columns=columns, show='headings')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER,
+                    minwidth=0, width=100, stretch=tkinter.NO)
+        tree.heading("#{}".format(i+1), text=columns[i])
+
+    for item in req:
+        tree.insert("", "end", values=item)
+
+    tree.grid(row=1, column=0, sticky='nsew')
+    scrollbar = ttk.Scrollbar(
+        root, orient=tkinter.VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.grid(row=1, column=1, sticky='ns')
+    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=0)
+    return
+
 def CustomerCancelRequestPage(root, cursor, customerID):
     root.title("Customer Request Page")
     f = ('Calibri', 13)
     tkinter.Label(text="Requests that I can cancel :)",
                   bg='#CCCCCC', font=f).grid(row=0, column=0)
     reqToCancelSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s\
-                      AND (requestStatus != 'Approved'\
-                      OR requestStatus != 'Canceled'\
-                      OR requestStatus != 'Completed')"
+                      AND requestStatus != 'Approved'\
+                      AND requestStatus != 'Canceled'\
+                      AND requestStatus != 'Completed'"
     cursor.execute(reqToCancelSQL, (customerID,))
     reqToCancel = cursor.fetchall()
     for i in range(len(reqToCancel)):
@@ -1471,6 +1504,8 @@ def changepage(other, optional=""):
         CustomerRequestPage(root, mycursor, optional)
     elif other == "customerCancelRequestPage":
         CustomerCancelRequestPage(root, mycursor, optional)
+    elif other == "customerAllRequestPage":
+        CustomerAllRequestsPage(root, mycursor, optional)
 
 
 def executeSQL(SQLFileName, cursor):
