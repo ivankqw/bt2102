@@ -74,6 +74,7 @@ CREATE TABLE Payment(
 
 CREATE TABLE ServiceFee(
     requestID           INT             NOT NULL,
+    settlementDate      DATE, 
     creationDate        DATE            NOT NULL,
     feeAmount           DECIMAL(10,2)   NOT NULL	CHECK (feeAmount >= 0),
     FOREIGN KEY (requestID) REFERENCES Request(requestID)

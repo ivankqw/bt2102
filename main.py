@@ -1297,7 +1297,8 @@ def CustomerRequestPage(root, cursor, customerID):
     f = ('Calibri', 13)
     tkinter.Label(text="Items that I can make Requests for :)",
                   bg='#CCCCCC', font=f).grid(row=0, column=0)
-    itemsToRequestSQL = "SELECT productID, itemID, dateOfPurchase FROM item WHERE customerID = %s AND serviceStatus = %s"
+    itemsToRequestSQL = "SELECT productID, itemID, dateOfPurchase FROM item i WHERE customerID = %s AND serviceStatus = %s\
+                         AND NOT EXISTS (SELECT itemID from request rq WHERE i.itemID = rq.itemID)"
     cursor.execute(itemsToRequestSQL, (customerID, ""))
     itemsToRequest = cursor.fetchall()
     for i in range(len(itemsToRequest)):
@@ -1307,7 +1308,7 @@ def CustomerRequestPage(root, cursor, customerID):
         d = list(products.find({"ProductID": productID}))[0]
         warranty = d['Warranty (months)']
         cost = d['Cost ($)']
-        serviceFee = 40 * 0.2 * int(cost)
+        serviceFee = 40 + 0.2 * int(cost)
         itemsToRequest[i] = (productID, itemID, dateOfPurchase,
                              warranty, isPastWarranty(dateOfPurchase, warranty),
                              serviceFee if isPastWarranty(dateOfPurchase, warranty) else 0)
@@ -1380,9 +1381,9 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
         reqID = mycursor.fetchone()[0]
         createServiceFee = "INSERT INTO servicefee (requestID, creationDate, feeAmount) VALUES (%s, %s, %s)"
         mycursor.execute(createServiceFee, (reqID, datetime.datetime.today().strftime('%Y-%m-%d'), serviceFee))
-
-    updateItem = "UPDATE item SET serviceStatus = 'Waiting for approval' WHERE itemID = %s"
-    mycursor.execute(updateItem, (itemID,))
+    else: 
+        updateItem = "UPDATE item SET serviceStatus = 'Waiting for approval' WHERE itemID = %s"
+        mycursor.execute(updateItem, (itemID,))
     mydb.commit()
 
 def deleteInvalidRequests():
