@@ -1246,7 +1246,10 @@ def CustomerCancelRequestPage(root, cursor, customerID):
     f = ('Calibri', 13)
     tkinter.Label(text="Requests that I can cancel :)",
                   bg='#CCCCCC', font=f).grid(row=0, column=0)
-    reqToCancelSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s"
+    reqToCancelSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s\
+                      AND (requestStatus != 'Approved'\
+                      OR requestStatus != 'Canceled'\
+                      OR requestStatus != 'Completed')"
     cursor.execute(reqToCancelSQL, (customerID,))
     reqToCancel = cursor.fetchall()
     for i in range(len(reqToCancel)):
@@ -1398,8 +1401,8 @@ def getAndCancelRequest(requestID):
     itemID = mycursor.fetchone()[0]
     updateItem = "UPDATE item SET servicestatus = %s where itemid = %s"
     mycursor.execute(updateItem, ("", itemID))
-    #delete the request
-    del_statement = "DELETE from request where requestID = %s"
+    #cancel request
+    del_statement = "UPDATE request SET requestStatus = 'Canceled' where requestID = %s"
     mycursor.execute(del_statement, (requestID,))
 
     mydb.commit()
