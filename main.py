@@ -898,7 +898,7 @@ def CustomerHomePage(root, cursor, customerID):
                    cursor='hand2', command=lambda: changepage("customerCancelRequestPage", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2').pack()  # ,command= lambda: changepage("payServiceHomePage")).pack()
+                   cursor='hand2',command= lambda: changepage("payServiceHomePage", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
@@ -1244,6 +1244,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
         'Calibri', 20),  relief=tkinter.SOLID, command=lambda: buy_selected(tree.selection(), customerID)).grid(row=6, column=0)
 
+
 def CustomerAllRequestsPage(root, cursor, customerID):
     root.title("Customer Request Page")
     f = ('Calibri', 13)
@@ -1273,6 +1274,7 @@ def CustomerAllRequestsPage(root, cursor, customerID):
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
                    relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=0)
     return
+
 
 def CustomerCancelRequestPage(root, cursor, customerID):
     root.title("Customer Request Page")
@@ -1327,6 +1329,7 @@ def CustomerCancelRequestPage(root, cursor, customerID):
                 title="Requests cancelled", message="Requests have been cancelled. Thank you!")
             changepage("customerCancelRequestPage", customerID)
     return
+
 
 def CustomerRequestPage(root, cursor, customerID):
     root.title("Customer Request Page")
@@ -1403,8 +1406,10 @@ def CustomerRequestPage(root, cursor, customerID):
             changepage("customerRequestPage", customerID)
     return
 
+
 def isPastWarranty(dateOfPurchase, warranty):
     return (datetime.datetime.today().date() - dateOfPurchase).days > warranty * 30
+
 
 def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     status = "Submitted and Waiting for payment" if itemPastWarranty else "Submitted"
@@ -1422,10 +1427,92 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
         mycursor.execute(updateItem, (itemID,))
     mydb.commit()
 
+
+def PayRequests(root, cursor, customerID):
+    # Page to view, select and pay for requests submitted by customer which requires payment
+    ws = root
+    ws.title('Pay for submitted requests')
+    ws.config(bg='#add8e6')
+    f = ('Calibri', 13)
+
+    tkinter.Label(text="Requests you have submitted which require payment", font=f).grid(row=0, column=0)
+
+    style = ttk.Style()
+    style.theme_use("default")
+    columns = ('requestID', 'requestDate', 'requestStatus', 'itemID', 'feeAmount')
+    tree = ttk.Treeview(root, columns=columns, show='headings')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER,
+                    minwidth=0, width=100, stretch=tkinter.NO)
+        tree.heading("#{}".format(i+1), text=columns[i])
+
+    requestsToPaySQL = (
+        "SELECT r.requestID, requestDate, requestStatus, itemID, feeAmount "
+        "FROM servicefee sf LEFT JOIN request r ON sf.requestID = r.requestID "
+        "WHERE customerID = {}"
+    ).format(customerID)
+    cursor.execute(requestsToPaySQL)
+    requestsToPay = cursor.fetchall()
+    for r in requestsToPay:
+        tree.insert("", "end", values=r)
+
+    tree.grid(row=1, column=0, sticky='nsew')
+    scrollbar = ttk.Scrollbar(ws, orient=tkinter.VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.grid(row=1, column=1, sticky='ns')
+
+
+    def pay_selected(selected_items):
+        requests = []
+        for i in selected_items:
+            item = tree.item(i)['values']
+            requestID = item[0]
+            itemID = item[3]
+            paymentAmount = item[4]
+            requests.append((requestID, itemID, paymentAmount))
+        
+            
+
+        payall = messagebox.askyesno(
+            title="Confirm Payment", message="Click Yes to confirm payment of the following requests: \n\nRequest IDs:{}".format([x for x in requests]))
+        if payall:
+            for item in requests:
+                requestID = item[0]
+                itemID = item[1]
+                paymentAmount = item[2]
+                
+                # update servicefee.settlementdate
+                update_servicefee = "UPDATE servicefee SET settlementDate = %s WHERE requestID = %s"
+                mycursor.execute(update_servicefee, (datetime.datetime.today().strftime('%Y-%m-%d'), requestID))
+                # update request.requestStatus
+                update_requeststatus = "UPDATE request SET requestStatus = %s WHERE requestID = %s"
+                mycursor.execute(update_requeststatus, ("In progress", requestID))
+                # update item.serviceStatus
+                update_itemservicestatus = "UPDATE item SET serviceStatus = %s WHERE itemID = %s"
+                mycursor.execute(update_itemservicestatus, ("Waiting for approval", itemID))
+                # create payment
+                createPayment = "INSERT INTO payment (customerID, requestID, paymentDate, paymentAmount) VALUES (%s, %s, %s, %s)"
+                mycursor.execute(createPayment, (customerID, requestID, datetime.datetime.today().strftime('%Y-%m-%d'), paymentAmount))
+
+                
+                mydb.commit()
+
+                
+            messagebox.showinfo(
+                title="Requests paid", message="Requests successfully paid. Thank you!")
+            
+
+    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
+                relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=6, column=0)
+    tkinter.Button(text="PAY SELECTED REQUESTS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=5, column=0)
+
+
 def deleteInvalidRequests():
     #payment of service fees must be made within 10 days from request date 
     #if service fees are not made by the due date, the request will be canceled automatically
     return
+
 
 def getAndCancelRequest(requestID):
     #change the serviceStatus of the item back to ""
@@ -1506,6 +1593,8 @@ def changepage(other, optional=""):
         CustomerCancelRequestPage(root, mycursor, optional)
     elif other == "customerAllRequestPage":
         CustomerAllRequestsPage(root, mycursor, optional)
+    elif other == "payServiceHomePage":
+        PayRequests(root, mycursor, optional)
 
 
 def executeSQL(SQLFileName, cursor):
@@ -1525,15 +1614,13 @@ def mysqlSelect(command, cursor):
     return result
 
 # Global variables
-
-
 customerName = ""
 customerID = ""
 
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1542,7 +1629,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
