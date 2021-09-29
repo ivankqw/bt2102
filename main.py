@@ -746,11 +746,27 @@ def AdminHomePage(root, cursor, adminID):
     tkinter.Button(text="Unpaid", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("unpaidHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
+    def areThereRequests():
+        select_requests = "SELECT * FROM request WHERE requestStatus = 'Submitted' OR requestStatus = 'In progress'"
+        cursor.execute(select_requests)
+        all_requests = cursor.fetchall()
+        cursor.reset()
+        if all_requests == []:
+            return False
+        return True
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("approveHomePage", adminID)).pack()
+                   cursor='hand2', command=lambda: changepage("approveHomePage", adminID) if areThereRequests() else messagebox.showinfo('Good news!', 'No requests waiting to be approved')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
+    def areThereItemsToService():
+        select_inprogitems = "SELECT * FROM item WHERE serviceStatus = serviceStatus = 'In progress'"
+        cursor.execute(select_inprogitems)
+        itemsinprog = cursor.fetchall()
+        cursor.reset()
+        if itemsinprog == []:
+            return False
+        return True
     tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID)).pack()
+                   cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items im progress of service')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
