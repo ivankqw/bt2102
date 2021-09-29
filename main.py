@@ -918,8 +918,16 @@ def CustomerHomePage(root, cursor, customerID):
     tkinter.Button(text="Cancel a Request", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("customerCancelRequestPage", customerID)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
+    def areTherePayments():
+        select_payments = "SELECT * FROM request WHERE requestStatus = 'Submitted and Waiting for payment'"
+        cursor.execute(select_payments)
+        all_payments = cursor.fetchall()
+        cursor.reset()
+        if all_payments == []:
+            return False
+        return True
     tkinter.Button(text="Pay for Item Service", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2',command= lambda: changepage("payServiceHomePage", customerID)).pack()
+                   cursor='hand2',command= lambda: changepage("payServiceHomePage", customerID) if areTherePayments() else messagebox.showinfo('No payments currently needed!')).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
@@ -1208,8 +1216,40 @@ def SearchPage(root, cursor, customerID):
 
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="", bg='#add8e6').pack()
+    def areThereSearchResults():
+        item_count = 0
+        color = advanced_options['Color'].get()
+        factory = advanced_options['Factory'].get()
+        powerSupply = advanced_options['PowerSupply'].get()
+        prodYear = advanced_options['ProductionYear'].get()
+        find_dict = {}
+        if category.get() != default_category:
+            find_dict['Category'] = category.get()
+        if category.get() == "Lights" and category.get() != default_category:
+            find_dict['Model'] = light.get()
+        if category.get() == "Locks" and category.get() != default_category:
+            find_dict['Model'] = lock.get()
+        if color != default_category:
+            find_dict['Color'] = color
+        if factory != default_category:
+            find_dict['Factory'] = factory
+        if powerSupply != default_category:
+            find_dict['PowerSupply'] = powerSupply
+        if prodYear != default_category:
+            find_dict['ProductionYear'] = prodYear
+
+        for item in items.find(find_dict):
+            if itemSold(cursor, item['ItemID']):
+                continue
+            item_count += 1
+
+        if item_count == 0:
+            return False
+        return True
     tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
-                   command=lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options, customerID)).pack()
+                   command=lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options, customerID) 
+                   ).pack()
+                   ##if areThereSearchResults() else messagebox.showinfo('No search results!')
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).pack(side=tkinter.TOP)
