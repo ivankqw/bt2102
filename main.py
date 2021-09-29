@@ -978,15 +978,14 @@ def ApproveHomePage(root, cursor, adminID):
             itemId = tree.item(i)['values'][5] 
             approve_info.append((requestId, itemId)) 
             displayItems.append(requestId) 
- 
         approveall = messagebox.askyesno( 
             title="Confirm Approval", message="Click Yes to confirm approval of the following requests: \n\n{}".format(displayItems)) 
         if approveall: 
             for i in range(len(approve_info)): 
-                approveAndUpdateRequestStatusAndTagAdminID(approve_info[i][0], adminID, approve_info[i][1]) 
+                approveAndUpdateRequestStatusAndTagAdminID(approve_info[i][0], adminID, approve_info[i][1])
             messagebox.showinfo( 
                 title="Requests Approved", message="Requests successfully approved. Thank you!") 
-            changepage("approveHomePage")
+            changepage("approveHomePage", adminID)
 
     if table_info == []:
         messagebox.showinfo('Good news!', 'No requests waiting to be approved')
@@ -1456,7 +1455,7 @@ def PayRequests(root, cursor, customerID):
     tree = ttk.Treeview(root, columns=columns, show='headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
-                    minwidth=0, width=100, stretch=tkinter.NO)
+                    minwidth=0, width=150, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text=columns[i])
 
     requestsToPaySQL = (
@@ -1638,7 +1637,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9935327i"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Cf66486648"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
