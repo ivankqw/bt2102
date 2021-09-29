@@ -749,6 +749,9 @@ def AdminHomePage(root, cursor, adminID):
     tkinter.Button(text="Approve", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("approveHomePage", adminID)).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
+    tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID)).pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
 
@@ -974,7 +977,7 @@ def ApproveHomePage(root, cursor, adminID):
                 approveAndUpdateRequestStatusAndTagAdminID(i, adminID)
             messagebox.showinfo(
                 title="Requests Approved", message="Requests successfully approved. Thank you!")
-            changepage("approveHomePage")
+            changepage("approveHomePage", adminID)
 
     if table_info == []:
         messagebox.showinfo('Good news!', 'No requests waiting to be approved')
@@ -988,6 +991,69 @@ def ApproveHomePage(root, cursor, adminID):
     tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).pack(side=tkinter.BOTTOM)
     return
+
+def updateServiceStatus(itemID):
+    updateRequestStatus = "UPDATE item SET serviceStatus = 'Completed' WHERE itemID = %s"
+    mycursor.execute(updateRequestStatus % itemID)
+    mydb.commit()
+    return
+
+def ServiceItemsPage(root, cursor, adminID):
+    main_screen = root
+    main_screen.title("OSHES app")
+    main_screen.config(bg='#e6bbad')
+    main_screen.grid()
+
+    tkinter.Label(text="Here are the items currently in progress of being serviced :)",
+                  width="300", height="2", font=("Calibri", 13)).pack()
+    selection_statement = "SELECT itemID, serviceStatus, customerID, adminID FROM item WHERE serviceStatus = 'In Progress'"
+    cursor.execute(selection_statement)
+    table_info = cursor.fetchall()
+    cursor.reset()
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(root, columns=('Item ID', 'Service Status',
+                        'Customer ID', 'Admin ID'), show='headings')
+    tree.pack()
+
+    root.title('Service Page')
+    tree.column('#1', anchor=CENTER, width='100')
+    tree.heading('#1', text='Item ID')
+    tree.column('#2', anchor=CENTER, width='100')
+    tree.heading('#2', text='Service Status')
+    tree.column('#3', anchor=CENTER, width='100')
+    tree.heading('#3', text='Customer ID')
+    tree.column('#4', anchor=CENTER, width='100')
+    tree.heading('#4', text='Admin ID')
+
+    def service_selected(selected_items):
+        service_itemIDs = []
+        for i in selected_items:
+            itemId = tree.item(i)['values'][0]
+            service_itemIDs.append(itemId)
+        approveall = messagebox.askyesno(
+            title="Confirm Services?", message="Click Yes to confirm completion of services of the following items: \n\n{}".format(service_itemIDs))
+        if approveall:
+            for i in service_itemIDs:
+                updateServiceStatus(i)
+            messagebox.showinfo(
+                title="Items Serviced.", message="Items successfully serviced. Thank you!")
+            changepage("serviceItemsPage", adminID)
+
+    if table_info == []:
+        messagebox.showinfo('Good news!', 'No items left to service.')
+    else:
+        for i in table_info:
+            tree.insert("", "end", values=i)
+        tkinter.Button(text="Service Selected Items", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
+            'Calibri', 20),  relief=tkinter.SOLID, command=lambda: service_selected(tree.selection())).pack()
+
+    tkinter.Label(text="", bg='#e6bbad').pack()
+    tkinter.Button(text="Back To Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).pack(side=tkinter.BOTTOM)
+    return
+
 
 
 def CustomerBuySearch(root, cursor, currCustomerID):
@@ -1444,7 +1510,7 @@ def PayRequests(root, cursor, customerID):
     tree = ttk.Treeview(root, columns=columns, show='headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
-                    minwidth=0, width=100, stretch=tkinter.NO)
+                    minwidth=0, width=150, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text=columns[i])
 
     requestsToPaySQL = (
@@ -1591,6 +1657,8 @@ def changepage(other, optional=""):
         InventoryHomePage(root, mycursor, optional)
     elif other == "serviceStatusesHomePage":
         ServiceStatusesPage(root, mycursor, optional)
+    elif other == "serviceItemsPage":
+        ServiceItemsPage(root, mycursor, optional)
     elif other == "unpaidHomePage":
         UnpaidHomePage(root, mycursor, optional)
     elif other == "customerRequestPage":
@@ -1626,7 +1694,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Yessir"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1635,7 +1703,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
