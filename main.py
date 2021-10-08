@@ -758,13 +758,16 @@ def AdminHomePage(root, cursor, adminID):
                    cursor='hand2', command=lambda: changepage("approveHomePage", adminID) if areThereRequests() else messagebox.showinfo('Good news!', 'No requests waiting to be approved')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     def areThereItemsToService():
-        select_inprogitems = "SELECT * FROM item WHERE serviceStatus = serviceStatus = 'In progress'"
+        
+        select_inprogitems = "SELECT * FROM item WHERE serviceStatus = 'In progress'"
         cursor.execute(select_inprogitems)
         itemsinprog = cursor.fetchall()
         cursor.reset()
         if itemsinprog == []:
             return False
+        
         return True
+        
     tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items im progress of service')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
@@ -947,7 +950,7 @@ def approveAndUpdateRequestStatusAndTagAdminID(requestID, adminID, itemID):
     updateAdminID2 = "UPDATE item SET adminID = %s WHERE itemID = %s" 
     mycursor.execute(updateAdminID2, (adminID, itemID)) 
     #now item table will have admin id correspond to item id, then update servicestatus  
-    updateServiceStatus = "UPDATE item SET serviceStatus = 'In Progress' WHERE itemID = %s AND adminID = %s" 
+    updateServiceStatus = "UPDATE item SET serviceStatus = 'In progress' WHERE itemID = %s AND adminID = %s" 
     mycursor.execute(updateServiceStatus, (itemID, adminID)) 
     mydb.commit() 
     return 
@@ -1041,7 +1044,7 @@ def ServiceItemsPage(root, cursor, adminID):
 
     tkinter.Label(text="Here are the items currently in progress of being serviced :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    selection_statement = "SELECT itemID, serviceStatus, customerID, adminID FROM item WHERE serviceStatus = 'In Progress'"
+    selection_statement = "SELECT itemID, serviceStatus, customerID, adminID FROM item WHERE serviceStatus = 'In progress'"
     cursor.execute(selection_statement)
     table_info = cursor.fetchall()
     cursor.reset()
@@ -1638,7 +1641,7 @@ def PayRequests(root, cursor, customerID):
 
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
                 relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=6, column=0)
-    tkinter.Button(text="PAY SELECTED REQUESTS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
+    tkinter.Button(text="PAY SELECTED REQUEST", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
         'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=5, column=0)
 
 
@@ -1650,6 +1653,7 @@ def cancelInvalidRequests():
          where (date_add(creationdate, interval 10 day) < current_date())"
     #if service fees are not made by the due date, the request will be canceled automatically
     mycursor.execute(updateStatement)
+    mydb.commit()
     return
 
 
@@ -1761,7 +1765,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Cf66486648"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1770,7 +1774,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
