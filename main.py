@@ -541,7 +541,7 @@ def CustomerLoginPage(root, cursor):
         warn = ""
         if email_tf.get() == "":
             warn += "\n"
-            warn += "Please enter an email!"
+            warn += "Please enter an ID!"
         else:
             check_counter += 1
         if pwd_tf.get() == "":
@@ -550,7 +550,7 @@ def CustomerLoginPage(root, cursor):
         else:
             check_counter += 1
 
-        selection_statement = "SELECT customerID, customerName, email, customerPassword FROM Customer WHERE email = %s AND customerPassword = %s"
+        selection_statement = "SELECT customerID, customerName, email, customerPassword FROM Customer WHERE customerID = %s AND customerPassword = %s"
 
         if check_counter == 2:
             try:
@@ -589,7 +589,7 @@ def CustomerLoginPage(root, cursor):
 
     tkinter.Label(
         left_frame,
-        text="Enter your Email",
+        text="Enter your Customer ID",
         bg='#CCCCCC',
         font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
 
@@ -646,7 +646,7 @@ def AdminLoginPage(root, cursor):
         else:
             check_counter += 1
 
-        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE phoneNumber = %s AND adminPassword = %s"
+        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE adminID = %s AND adminPassword = %s"
 
         if check_counter == 2:
             try:
@@ -685,7 +685,7 @@ def AdminLoginPage(root, cursor):
 
     tkinter.Label(
         left_frame,
-        text="Enter your Phone Number",
+        text="Enter your Admin ID",
         bg='#CCCCCC',
         font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
 
@@ -1549,9 +1549,24 @@ def isPastWarranty(dateOfPurchase, warranty):
 
 
 def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
+    #handle cancelled request
+    getReqID = "SELECT requestID from request WHERE customerID = %s AND itemID = %s"
+    mycursor.execute(getReqID, (customerID, itemID))
     status = "Submitted and Waiting for payment" if itemPastWarranty else "Submitted"
-    makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
-    mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
+    a = False 
+    try: 
+        a = mycursor.fetchone()[0]
+    except:
+        a = False 
+
+    if not a:
+        makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
+        mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
+    else:
+        reqID = a
+        updateReq = "UPDATE request SET requestStatus = %s WHERE requestID = %s"
+        mycursor.execute(updateReq, (status, reqID))
+
 
     if itemPastWarranty:
         getReqID = "SELECT requestID FROM request WHERE customerID = %s AND itemID = %s"
@@ -1667,6 +1682,9 @@ def getAndCancelRequest(requestID):
     #cancel request
     del_statement = "UPDATE request SET requestStatus = 'Canceled' where requestID = %s"
     mycursor.execute(del_statement, (requestID,))
+    #delete serviceFee is any
+    dele = "DELETE from servicefee where requestid = %s"
+    mycursor.execute(dele, (requestID,))
 
     mydb.commit()
 
