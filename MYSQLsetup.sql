@@ -53,7 +53,7 @@ CREATE TABLE Request(
     requestDate         DATE            NOT NULL,
     requestStatus       VARCHAR(255)    NOT NULL,
     customerID      	INT             NOT NULL,
-    adminID             INT             NOT NULL,
+    adminID             INT             ,
     itemID              INT             NOT NULL,
     PRIMARY KEY (requestID),
     FOREIGN KEY (customerID) REFERENCES Customer(customerID),
@@ -74,6 +74,7 @@ CREATE TABLE Payment(
 
 CREATE TABLE ServiceFee(
     requestID           INT             NOT NULL,
+    settlementDate      DATE, 
     creationDate        DATE            NOT NULL,
     feeAmount           DECIMAL(10,2)   NOT NULL	CHECK (feeAmount >= 0),
     FOREIGN KEY (requestID) REFERENCES Request(requestID)
