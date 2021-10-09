@@ -7,7 +7,7 @@ from PIL import ImageTk, Image
 from datetime import datetime
 import mysql.connector
 import re
-from tkinter import Tk, ttk
+from tkinter import StringVar, Tk, ttk
 from setup import init_mysql
 from pymongo import MongoClient
 import datetime
@@ -1142,7 +1142,7 @@ def SearchPage(root, cursor, customerID):
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
-    # ws.wm_geometry("450x900")
+    ws.wm_geometry("1040x900")
     ws.config(bg='#add8e6')
     tkinter.Label(text="Select category", bg='#add8e6').pack()
     default_category = "No option selected"
@@ -1214,8 +1214,26 @@ def SearchPage(root, cursor, customerID):
     dropprodyear = tkinter.OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
 
-    advanced_options = {'Color': color, 'Factory': factory,
-                        "PowerSupply": powersupply, "ProductionYear": prodyear}
+    # Price
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Price Range:", bg='#add8e6').pack()
+    tkinter.Label(text="Min:", bg='#add8e6').pack()
+    minprice = StringVar(value = '0')
+    maxprice = StringVar(value = '200')
+    pricemin = tkinter.Entry(textvariable=minprice)
+    pricemin.pack()
+    tkinter.Label(text="Max:", bg='#add8e6').pack()
+    pricemax = tkinter.Entry(textvariable=maxprice)
+    pricemax.pack()
+
+    advanced_options = {
+        'Color': color, 
+        'Factory': factory,
+        "PowerSupply": powersupply, 
+        "ProductionYear": prodyear,
+        "MinPrice": minprice,
+        "MaxPrice": maxprice
+        }
 
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="", bg='#add8e6').pack()
@@ -1263,7 +1281,6 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    # ws.wm_geometry("1040x650")
     ws.title('Search results')
     ws.config(bg='#add8e6')
     f = ('Calibri', 13)
@@ -1272,7 +1289,17 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     factory = advanced_options['Factory'].get()
     powerSupply = advanced_options['PowerSupply'].get()
     prodYear = advanced_options['ProductionYear'].get()
-
+    try:
+        minPrice = int(advanced_options['MinPrice'].get())
+        maxPrice = int(advanced_options['MaxPrice'].get())
+    except:
+        messagebox.showerror(title="Invalid Price Range", message="Price range should be from 0 to 200 ($)")
+        SearchPage(root, cursor, customerID)
+    else:
+        if (minPrice < 0 or maxPrice < 0 or minPrice > maxPrice):
+            messagebox.showerror(title="Invalid Price Range", message="Price range should be from 0 to 200 ($)")
+            SearchPage(root, cursor, customerID)
+    
     default_category = "No option selected"
     search_string = ""
     if cat != default_category:
@@ -1287,6 +1314,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
         search_string += "powerSupply: " + powerSupply + ", "
     if prodYear != default_category:
         search_string += "productionYear: " + prodYear + ", "
+    search_string += "Price range: {} to {}, ".format(minPrice, maxPrice)
     tkinter.Label(text="Search results for {}".format(
         search_string[:-2]), bg='#CCCCCC', font=f).grid(row=0, column=0)
 
@@ -1303,7 +1331,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
         tree.heading("#{}".format(i+1), text=columns[i])
 
     item_count = 0
-    # 'Color':color, 'Factory':factory, 'PowerSupply':powerSupply, 'ProductionYear': prodYear
+    # Creating of MongoDB query dict
     find_dict = {}
     if cat != default_category:
         find_dict['Category'] = cat
@@ -1317,6 +1345,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
         find_dict['PowerSupply'] = powerSupply
     if prodYear != default_category:
         find_dict['ProductionYear'] = prodYear
+    
 
     for item in items.find(find_dict):
         if itemSold(cursor, item['ItemID']):
@@ -1334,23 +1363,14 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
             itemPriceWarranty(item['Category'], item['Model'])[0],
             itemPriceWarranty(item['Category'], item['Model'])[1]
         )
-        tree.insert("", "end", values=values)
+        price = int(values[-2])
+        if price >= minPrice and price <= maxPrice:
+            tree.insert("", "end", values=values)
 
     tree.grid(row=1, column=0, sticky='nsew')
     scrollbar = ttk.Scrollbar(ws, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky='ns')
-
-    # def select():
-    #     ##REMOVE PREVIOUS SELECTIONS
-    #     for label in ws.grid_slaves():
-    #         if int(label.grid_info()["row"]) > 7:
-    #             label.grid_forget()
-    #     curItems = tree.selection()
-    #     print(curItems)
-    #     tkinter.Label(root, text="\n".join([str(tree.item(i)['values']) for i in curItems])).grid(row=8, column=0)
-
-    # tree.bind("<Return>", lambda e: select())
 
     def buy_selected(selected_items, customerID):
         buy_itemIDs = []
