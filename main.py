@@ -1,7 +1,7 @@
 import tkinter
-from tkinter.constants import BOTTOM, CENTER, LEFT, RIGHT, TRUE
+from tkinter.constants import CENTER, TRUE
 import tkinter.messagebox as messagebox
-from tkscrolledframe import ScrolledFrame 
+from tkscrolledframe import ScrolledFrame
 from PIL import ImageTk, Image
 
 from datetime import datetime
@@ -18,7 +18,6 @@ def LandingPage(root):
     main_screen.title("OSHES app")
     main_screen.config(bg='#0B5A81')
     main_screen.grid()
-
     tkinter.Label(text="Welcome to OSHES :)", width="300",
                   height="2", font=("Calibri", 13)).pack()
     tkinter.Label(text="", bg='#0B5A81').pack()
@@ -541,7 +540,7 @@ def CustomerLoginPage(root, cursor):
         warn = ""
         if email_tf.get() == "":
             warn += "\n"
-            warn += "Please enter an email!"
+            warn += "Please enter an ID!"
         else:
             check_counter += 1
         if pwd_tf.get() == "":
@@ -550,7 +549,7 @@ def CustomerLoginPage(root, cursor):
         else:
             check_counter += 1
 
-        selection_statement = "SELECT customerID, customerName, email, customerPassword FROM Customer WHERE email = %s AND customerPassword = %s"
+        selection_statement = "SELECT customerID, customerName, email, customerPassword FROM Customer WHERE customerID = %s AND customerPassword = %s"
 
         if check_counter == 2:
             try:
@@ -589,7 +588,7 @@ def CustomerLoginPage(root, cursor):
 
     tkinter.Label(
         left_frame,
-        text="Enter your Email",
+        text="Enter your Customer ID",
         bg='#CCCCCC',
         font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
 
@@ -646,7 +645,7 @@ def AdminLoginPage(root, cursor):
         else:
             check_counter += 1
 
-        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE phoneNumber = %s AND adminPassword = %s"
+        selection_statement = "SELECT adminID, adminName, phoneNumber, adminPassword FROM Administrator WHERE adminID = %s AND adminPassword = %s"
 
         if check_counter == 2:
             try:
@@ -685,7 +684,7 @@ def AdminLoginPage(root, cursor):
 
     tkinter.Label(
         left_frame,
-        text="Enter your Phone Number",
+        text="Enter your Admin ID",
         bg='#CCCCCC',
         font=f).grid(row=0, column=0, sticky=tkinter.W, pady=10)
 
@@ -758,13 +757,16 @@ def AdminHomePage(root, cursor, adminID):
                    cursor='hand2', command=lambda: changepage("approveHomePage", adminID) if areThereRequests() else messagebox.showinfo('Good news!', 'No requests waiting to be approved')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     def areThereItemsToService():
-        select_inprogitems = "SELECT * FROM item WHERE serviceStatus = serviceStatus = 'In progress'"
+        
+        select_inprogitems = "SELECT * FROM item WHERE serviceStatus = 'In progress'"
         cursor.execute(select_inprogitems)
         itemsinprog = cursor.fetchall()
         cursor.reset()
         if itemsinprog == []:
             return False
+        
         return True
+        
     tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items im progress of service')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
@@ -857,18 +859,18 @@ def ServiceStatusesPage(root, mycursor, adminID):
 
 
 def UnpaidHomePage(root, mycursor, adminID):
-    sql3 = "SELECT C.customerID, C.customerName, C.email, C.address\
-        FROM customer AS C\
-        INNER JOIN request AS R ON R.customerID = C.customerID\
-        WHERE R.requestStatus = 'Submitted and Waiting for payment' "
+    sql3 = "\
+    SELECT customerID, itemID, requestID from request\
+    WHERE requestStatus = 'Submitted and Waiting for payment' \
+    UNION \
+    SELECT 'Total no. of unpaid customers', '', count(*) from request \
+    WHERE requestStatus = 'Submitted and Waiting for payment'"
 
     mycursor.execute(sql3)
     myresult = mycursor.fetchall()
 
-    tkinter.Label(text="Customers with unpaid service fees", width=50,
-                  height="2", font=("Calibri", 13)).grid(row = 0, column = 0, sticky='ew')
-    
-
+    tkinter.Label(text="Customers with unpaid service fees", width=30,
+                  height="2", font=("Calibri", 13)).grid(row=0, column=0)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -885,14 +887,14 @@ def UnpaidHomePage(root, mycursor, adminID):
 
     for x in myresult:
         tree.insert("", "end", values=x)
-    tree.grid(row = 1, column = 0)
+    tree.grid(row=1, column=0)
 
     scrollbar = ttk.Scrollbar(orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row = 1, column = 1, sticky = "ns")
+    scrollbar.grid(row=1, column=1, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row = 2, column = 0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
 
 
 def CustomerHomePage(root, cursor, customerID):
@@ -947,7 +949,7 @@ def approveAndUpdateRequestStatusAndTagAdminID(requestID, adminID, itemID):
     updateAdminID2 = "UPDATE item SET adminID = %s WHERE itemID = %s" 
     mycursor.execute(updateAdminID2, (adminID, itemID)) 
     #now item table will have admin id correspond to item id, then update servicestatus  
-    updateServiceStatus = "UPDATE item SET serviceStatus = 'In Progress' WHERE itemID = %s AND adminID = %s" 
+    updateServiceStatus = "UPDATE item SET serviceStatus = 'In progress' WHERE itemID = %s AND adminID = %s" 
     mycursor.execute(updateServiceStatus, (itemID, adminID)) 
     mydb.commit() 
     return 
@@ -1033,7 +1035,7 @@ def updateServiceStatus(itemID):
     mydb.commit()
     return
 
-def ServiceItemsPage(root, cursor, adminID): 
+def ServiceItemsPage(root, cursor, adminID):
     main_screen = root
     main_screen.title("OSHES app")
     main_screen.config(bg='#e6bbad')
@@ -1041,7 +1043,7 @@ def ServiceItemsPage(root, cursor, adminID):
 
     tkinter.Label(text="Here are the items currently in progress of being serviced :)",
                   width="300", height="2", font=("Calibri", 13)).pack()
-    selection_statement = "SELECT itemID, serviceStatus, customerID, adminID FROM item WHERE serviceStatus = 'In Progress'"
+    selection_statement = "SELECT itemID, serviceStatus, customerID, adminID FROM item WHERE serviceStatus = 'In progress'"
     cursor.execute(selection_statement)
     table_info = cursor.fetchall()
     cursor.reset()
@@ -1062,7 +1064,7 @@ def ServiceItemsPage(root, cursor, adminID):
     tree.column('#4', anchor=CENTER, width='100')
     tree.heading('#4', text='Admin ID')
 
-    def service_selected(selected_items): 
+    def service_selected(selected_items):
         service_itemIDs = []
         for i in selected_items:
             itemId = tree.item(i)['values'][0]
@@ -1135,7 +1137,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
 
 
 def SearchPage(root, cursor, customerID):
-    for widget in root.winfo_children(): 
+    for widget in root.winfo_children():
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
@@ -1546,9 +1548,24 @@ def isPastWarranty(dateOfPurchase, warranty):
 
 
 def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
+    #handle cancelled request
+    getReqID = "SELECT requestID from request WHERE customerID = %s AND itemID = %s"
+    mycursor.execute(getReqID, (customerID, itemID))
     status = "Submitted and Waiting for payment" if itemPastWarranty else "Submitted"
-    makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
-    mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
+    a = False 
+    try: 
+        a = mycursor.fetchone()[0]
+    except:
+        a = False 
+
+    if not a:
+        makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
+        mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
+    else:
+        reqID = a
+        updateReq = "UPDATE request SET requestStatus = %s WHERE requestID = %s"
+        mycursor.execute(updateReq, (status, reqID))
+
 
     if itemPastWarranty:
         getReqID = "SELECT requestID FROM request WHERE customerID = %s AND itemID = %s"
@@ -1638,7 +1655,7 @@ def PayRequests(root, cursor, customerID):
 
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
                 relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=6, column=0)
-    tkinter.Button(text="PAY SELECTED REQUESTS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
+    tkinter.Button(text="PAY SELECTED REQUEST", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
         'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=5, column=0)
 
 
@@ -1650,6 +1667,7 @@ def cancelInvalidRequests():
          where (date_add(creationdate, interval 10 day) < current_date())"
     #if service fees are not made by the due date, the request will be canceled automatically
     mycursor.execute(updateStatement)
+    mydb.commit()
     return
 
 
@@ -1663,6 +1681,9 @@ def getAndCancelRequest(requestID):
     #cancel request
     del_statement = "UPDATE request SET requestStatus = 'Canceled' where requestID = %s"
     mycursor.execute(del_statement, (requestID,))
+    #delete serviceFee is any
+    dele = "DELETE from servicefee where requestid = %s"
+    mycursor.execute(dele, (requestID,))
 
     mydb.commit()
 
@@ -1760,8 +1781,8 @@ customerID = ""
 
 # Connect MYSQL
 MYSQL_HOST = "localhost"
-MYSQL_USER = "root" 
-MYSQL_PASSWORD = "Juhi123#"  # your pw here since everyone got diff pw
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1770,7 +1791,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
