@@ -866,20 +866,18 @@ def ServiceStatusesPage(root, mycursor, adminID):
 
 
 def UnpaidHomePage(root, mycursor, adminID):
-    sql3 = "\
-    SELECT customerID, itemID, requestID from request\
-    WHERE requestStatus = 'Submitted and Waiting for payment' \
-    UNION \
-    SELECT 'Total no. of unpaid customers', '', count(*) from request \
-    WHERE requestStatus = 'Submitted and Waiting for payment'"
+    sql3 = "SELECT C.customerID, C.customerName, C.email, C.address\
+        FROM customer AS C\
+        INNER JOIN request AS R ON R.customerID = C.customerID\
+        WHERE R.requestStatus = 'Submitted and Waiting for payment' "
 
     mycursor.execute(sql3)
     myresult = mycursor.fetchall()
 
 
 
-    tkinter.Label(text="Customers with unpaid service fees", width=30,
-                  height="2", font=("Calibri", 13)).grid(row=0, column=0)
+    tkinter.Label(text="Customers with unpaid service fees", width=50,
+                  height="2", font=("Calibri", 13)).grid(row=0, column=0, sticky='ew')
 
     style = ttk.Style()
     style.theme_use('default')
