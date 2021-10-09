@@ -1558,7 +1558,6 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
         a = mycursor.fetchone()[0]
     except:
         a = False 
-
     if not a:
         makeRequest = "INSERT INTO request (requestDate, requestStatus, customerID, adminID, itemID) VALUES (%s, %s, %s, NULL, %s)"
         mycursor.execute(makeRequest, (datetime.datetime.today().strftime('%Y-%m-%d'), status, customerID, itemID))
@@ -1566,6 +1565,8 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
         reqID = a
         updateReq = "UPDATE request SET requestStatus = %s WHERE requestID = %s"
         mycursor.execute(updateReq, (status, reqID))
+        updateAgain = "UPDATE request SET requestDate = %s WHERE requestID = %s"
+        mycursor.execute(updateAgain, (datetime.datetime.today().strftime('%Y-%m-%d'), reqID))
 
 
     if itemPastWarranty:
@@ -1662,12 +1663,22 @@ def PayRequests(root, cursor, customerID):
 
 def cancelInvalidRequests():
     #payment of service fees must be made within 10 days from request date 
+    '''
     updateStatement = "update request re\
          right join servicefee se on (re.requestid = se.requestid)\
          set re.requestStatus = 'Canceled'\
          where (date_add(creationdate, interval 10 day) < current_date())"
+    '''
+    mycursor.execute("SET SQL_SAFE_UPDATES = 0")
+
+    e = "update request re\
+        set re.requestStatus = 'Canceled'\
+        where (date_add(requestDate, interval 10 day) < current_date() = 1)\
+        and requestStatus = 'Submitted and Waiting for payment'"
+
     #if service fees are not made by the due date, the request will be canceled automatically
-    mycursor.execute(updateStatement)
+    mycursor.execute(e)
+    mycursor.execute("SET SQL_SAFE_UPDATES = 1")
     mydb.commit()
     return
 
