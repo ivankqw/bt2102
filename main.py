@@ -1581,7 +1581,7 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     mydb.commit()
 
 
-def PayRequests(root, cursor, customerID):
+def CustomerPayRequests(root, cursor, customerID):
     # Page to view, select and pay for requests submitted by customer which requires payment
     ws = root
     ws.title('Pay for submitted requests')
@@ -1593,15 +1593,15 @@ def PayRequests(root, cursor, customerID):
     style = ttk.Style()
     style.theme_use("default")
     columns = ('requestID', 'requestDate', 'requestStatus', 'itemID', 'feeAmount')
-    tree = ttk.Treeview(root, columns=columns, show='headings')
+    tree = ttk.Treeview(root, columns=columns, show='headings', selectmode="browse")
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
                     minwidth=0, width=150, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text=columns[i])
 
     requestsToPaySQL = (
-        "SELECT r.requestID, requestDate, requestStatus, itemID, feeAmount "
-        "FROM servicefee sf LEFT JOIN request r ON sf.requestID = r.requestID "
+        "SELECT r.requestID, requestDate, requestStatus, itemID, feeAmount " +
+        "FROM servicefee sf LEFT JOIN request r ON sf.requestID = r.requestID " +
         "WHERE customerID = {} and requestStatus = 'Submitted and Waiting for payment'"
     ).format(customerID)
     cursor.execute(requestsToPaySQL)
@@ -1627,7 +1627,7 @@ def PayRequests(root, cursor, customerID):
             
 
         payall = messagebox.askyesno(
-            title="Confirm Payment", message="Click Yes to confirm payment of the following requests: \n\nRequest IDs:{}".format([x for x in requests]))
+            title="Confirm Payment", message="Click Yes to confirm payment of the following request: \n\nRequest ID: {}".format([x[1] for x in requests]))
         if payall:
             for item in requests:
                 requestID = item[0]
@@ -1768,7 +1768,7 @@ def changepage(other, optional=""):
     elif other == "customerAllRequestPage":
         CustomerAllRequestsPage(root, mycursor, optional)
     elif other == "payServiceHomePage":
-        PayRequests(root, mycursor, optional)
+        CustomerPayRequests(root, mycursor, optional)
 
 
 def executeSQL(SQLFileName, cursor):
@@ -1794,7 +1794,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Valentin1"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1803,7 +1803,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
