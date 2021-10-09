@@ -1,7 +1,7 @@
 import tkinter
-from tkinter.constants import CENTER, TRUE
+from tkinter.constants import BOTTOM, CENTER, LEFT, RIGHT, TRUE
 import tkinter.messagebox as messagebox
-from tkscrolledframe import ScrolledFrame
+from tkscrolledframe import ScrolledFrame 
 from PIL import ImageTk, Image
 
 from datetime import datetime
@@ -857,18 +857,18 @@ def ServiceStatusesPage(root, mycursor, adminID):
 
 
 def UnpaidHomePage(root, mycursor, adminID):
-    sql3 = "\
-    SELECT customerID, itemID, requestID from request\
-    WHERE requestStatus = 'Submitted and Waiting for payment' \
-    UNION \
-    SELECT 'Total no. of unpaid customers', '', count(*) from request \
-    WHERE requestStatus = 'Submitted and Waiting for payment'"
+    sql3 = "SELECT C.customerID, C.customerName, C.email, C.address\
+        FROM customer AS C\
+        INNER JOIN request AS R ON R.customerID = C.customerID\
+        WHERE R.requestStatus = 'Submitted and Waiting for payment' "
 
     mycursor.execute(sql3)
     myresult = mycursor.fetchall()
 
-    tkinter.Label(text="Customers with unpaid service fees", width=30,
-                  height="2", font=("Calibri", 13)).grid(row=0, column=0)
+    tkinter.Label(text="Customers with unpaid service fees", width=50,
+                  height="2", font=("Calibri", 13)).grid(row = 0, column = 0, sticky='ew')
+    
+
 
     style = ttk.Style()
     style.theme_use('default')
@@ -885,14 +885,14 @@ def UnpaidHomePage(root, mycursor, adminID):
 
     for x in myresult:
         tree.insert("", "end", values=x)
-    tree.grid(row=1, column=0)
+    tree.grid(row = 1, column = 0)
 
     scrollbar = ttk.Scrollbar(orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky="ns")
+    scrollbar.grid(row = 1, column = 1, sticky = "ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row = 2, column = 0)
 
 
 def CustomerHomePage(root, cursor, customerID):
@@ -1033,7 +1033,7 @@ def updateServiceStatus(itemID):
     mydb.commit()
     return
 
-def ServiceItemsPage(root, cursor, adminID):
+def ServiceItemsPage(root, cursor, adminID): 
     main_screen = root
     main_screen.title("OSHES app")
     main_screen.config(bg='#e6bbad')
@@ -1062,7 +1062,7 @@ def ServiceItemsPage(root, cursor, adminID):
     tree.column('#4', anchor=CENTER, width='100')
     tree.heading('#4', text='Admin ID')
 
-    def service_selected(selected_items):
+    def service_selected(selected_items): 
         service_itemIDs = []
         for i in selected_items:
             itemId = tree.item(i)['values'][0]
@@ -1135,7 +1135,7 @@ def CustomerBuySearch(root, cursor, currCustomerID):
 
 
 def SearchPage(root, cursor, customerID):
-    for widget in root.winfo_children():
+    for widget in root.winfo_children(): 
         widget.destroy()
     ws = root
     ws.title('Choose a category!')
@@ -1760,8 +1760,8 @@ customerID = ""
 
 # Connect MYSQL
 MYSQL_HOST = "localhost"
-MYSQL_USER = "root"
-MYSQL_PASSWORD = "Cf66486648"  # your pw here since everyone got diff pw
+MYSQL_USER = "root" 
+MYSQL_PASSWORD = "Juhi123#"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
