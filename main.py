@@ -771,9 +771,133 @@ def AdminHomePage(root, cursor, adminID):
     tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items im progress of service')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
+    ##INITIALIZE DATA
+    def init_database():
+        def popup_table():
+            popup = tkinter.Toplevel(root)
+            popup.grid()
+            popup.wm_title("Database Initialized!")
+            popup.tkraise(root) # so message is on top of the main window
+            ##tkinter.Label(popup, text=msg).pack(side="top", fill="x", pady=10)
+            sql1 = "SELECT A.productID, A.Sold, B.Unsold \
+            FROM (SELECT productID, COUNT(purchaseStatus) as Sold \
+            FROM item \
+            WHERE purchaseStatus = 'Sold' \
+            GROUP by productID) AS A \
+            CROSS JOIN(SELECT productID, COUNT(purchaseStatus) as Unsold \
+            FROM item \
+            WHERE purchaseStatus = 'Unsold' \
+            GROUP by productID) AS B \
+            ON A.productID = B.productID"
+            cursor.execute(sql1)
+            myresult = cursor.fetchall()
+
+            style = ttk.Style()
+            style.theme_use('default')
+            tree = ttk.Treeview(columns=(
+                'IID', 'Number of SOLD items', 'Number of UNSOLD items'), show='headings')
+
+            root.title('Inventory')
+            tree.column("#1", anchor=CENTER, width=195)
+            tree.heading('#1', text='IID')
+            tree.column("#2", anchor=CENTER, width=195)
+            tree.heading('#2', text='Number of SOLD items')
+            tree.column("#3", anchor=CENTER, width=195)
+            tree.heading('#3', text='Number of UNSOLD items')
+
+            for x in myresult:
+                tree.insert("", "end", values=x)
+            tree.grid(row=1, column=0)
+
+            scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
+            tree.configure(yscroll=scrollbar.set)
+            scrollbar.grid(row=1, column=1, sticky="ns")
+            tkinter.Button(popup, text="Okay", command = popup.destroy).grid(row=2, column=0)
+
+            
+        popup_table()
+        def init_mongo():
+            client = MongoClient()
+            mongo = client['Inventory']
+            items = mongo.items
+            products = mongo.products
+            with open('items.json') as i:
+                i_data = json.load(i)
+            with open('products.json') as p:
+                p_data = json.load(p)
+    
+            items.insert_many(i_data)
+            products.insert_many(p_data)
+        
+        def create_indexes_mongo():
+            #simple search
+            client = MongoClient()
+            mongo = client['Inventory']
+            items = mongo.items
+            products = mongo.products
+            items.drop_indexes()
+            items.create_index([("Category", TEXT), ("Model", TEXT)])
+            return
+
+        # MYSQL Schema
+        def init_mysql(host='localhost',user='root',password=''):
+            mydb = mysql.connector.connect(host=host,user=user,passwd=password,database="oshes")
+            mycursor = mydb.cursor()
+            
+            with open('MYSQLSetup.sql', 'r') as SQLscript:
+                SQLcommands = SQLscript.read().split(';')
+                for command in SQLcommands:
+                    mycursor.execute(command)
+                    
+            mydb.close()
+
+        # Items.json info to MYSQL, while taking ProductID from products.json
+        def items_info_to_sql(password):
+            # def getProductIdOfItem(category, model):
+            #     client = MongoClient()
+            #     mongo = client['Inventory']
+            #     products = mongo.products
+            #     return list(products.find({'Category': category, 'Model' : model}))[0]['ProductID']
+            def getProductID(category, model):
+                p = open('products.json')
+                p = json.load(p)
+                for i in p:
+                    if i['Category'] == category and i['Model'] == model:
+                        return i['ProductID']
+            items_df = pd.read_json('items.json')
+            items_df['productID'] = items_df.apply(lambda row : getProductID(row.Category, row.Model), axis=1)
+            items_sql_df = items_df[["ItemID", "PurchaseStatus", "ServiceStatus", "productID"]]
+            
+            engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
+                                .format(user="root",
+                                        pw=password,
+                                        db="oshes"))
+
+            items_sql_df.to_sql('item', con = engine, if_exists='append', index=False)
+
+        # products.json info to MYSQL
+        def products_info_to_sql(password):
+            products_df = pd.read_json('products.json')
+            products_sql_df = products_df[["ProductID", "Warranty (months)"]]
+            products_sql_df.rename({"Warranty (months)": 'warrantyDuration'}, axis=1, inplace=True)
+            engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
+                                .format(user="root",
+                                        pw=password,
+                                        db="oshes"))
+
+            products_sql_df.to_sql('product', con = engine, if_exists='append', index=False)
+
+        init_mongo()
+        create_indexes_mongo()
+        init_mysql(password="Cf66486648")
+        items_info_to_sql(password="Cf66486648")
+        products_info_to_sql(password="Cf66486648")
+
+    tkinter.Button(text="Initialize Databases", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: init_database()).pack()
+    tkinter.Label(text="", bg='#e6bbad').pack()    
     tkinter.Button(text="Logout", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("landing")).pack(side=tkinter.BOTTOM)
-
 
     return
 
@@ -1814,7 +1938,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Valentin1"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Cf66486648"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
