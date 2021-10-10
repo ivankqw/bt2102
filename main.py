@@ -819,9 +819,7 @@ def AdminHomePage(root, cursor, adminID):
                 SQLcommands = SQLscript.read().split(';')
                 for command in SQLcommands:
                     mycursor.execute(command)
-                            
-        setup.init_mongo()
-        setup.create_indexes_mongo()
+
         init_mysql_inp(cursor)
         setup.items_info_to_sql(password=MYSQL_PASSWORD)
         setup.products_info_to_sql(password=MYSQL_PASSWORD)
