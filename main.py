@@ -676,10 +676,10 @@ def AdminLoginPage(root, cursor):
     ws.title('Administrator Login')
     ws.config(bg='#e6bbad')
 
-    for x in myresult:
-        tree.insert("", "end", values = x)
-    tree.grid(row = 1, column = 0)
-
+    #for x in myresult:
+    #    tree.insert("", "end", values = x)
+    #tree.grid(row = 1, column = 0)
+    f = ('Times', 14)
    
     left_frame = tkinter.Frame(
         ws,
