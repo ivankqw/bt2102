@@ -4,7 +4,7 @@ import tkinter.messagebox as messagebox
 from tkscrolledframe import ScrolledFrame
 from PIL import ImageTk, Image
 
-from datetime import datetime
+import datetime
 import mysql.connector
 import re
 from tkinter import StringVar, Tk, ttk
