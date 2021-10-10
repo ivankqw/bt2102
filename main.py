@@ -820,8 +820,8 @@ def AdminHomePage(root, cursor, adminID):
         setup.init_mongo()
         setup.create_indexes_mongo()
         init_mysql_inp(cursor)
-        setup.items_info_to_sql(password="Cf66486648")
-        setup.products_info_to_sql(password="Cf66486648")
+        setup.items_info_to_sql(password=MYSQL_PASSWORD)
+        setup.products_info_to_sql(password=MYSQL_PASSWORD)
         popup_table(root)
 
     tkinter.Button(text="Initialize Databases", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
@@ -1869,7 +1869,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Cf66486648"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -1878,7 +1878,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
