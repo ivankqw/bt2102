@@ -16,7 +16,6 @@ import json
 import pandas as pd
 from sqlalchemy import create_engine
 import setup
-from setup import init_mysql_inp
 
 def LandingPage(root):
     """ main_screen = root
