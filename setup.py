@@ -13,7 +13,7 @@ def create_db_mysql(host='localhost',user='root',password=''):
     mycursor.execute("CREATE DATABASE oshes")
     mydb.close()
 
-# Create MongoDB Database
+# Create MongoDB Database 
 def init_mongo():
     client = MongoClient()
     mongo = client['Inventory']
@@ -95,14 +95,14 @@ def init_fake(host='localhost',user='root',password=''):
         for command in SQLcommands:
             mycursor.execute(command)
             
-    mydb.close()
+    mydb.close() 
 
-#create_db_mysql(password='')
+#create_db_mysql(password='Juhi123#')
 
 '''run these'''
-# init_mysql(password="s9935327i")
-# items_info_to_sql(password="s9935327i")
-# products_info_to_sql(password="s9935327i")
-# init_fake(password="s9935327i")
+#init_mysql(password="Juhi123#")
+#items_info_to_sql(password="Juhi123#")
+#products_info_to_sql(password="Juhi123#")
+#init_fake(password="Juhi123#")
 
 

@@ -22,7 +22,6 @@ def LandingPage(root):
     main_screen.title("OSHES app")
     main_screen.config(bg='#0B5A81')
     main_screen.grid()
-
     tkinter.Label(text="Welcome to OSHES :)", width="300",
                   height="2", font=("Calibri", 13)).pack()
     tkinter.Label(text="", bg='#0B5A81').pack()
@@ -636,6 +635,7 @@ def CustomerLoginPage(root, cursor):
 
 
 def AdminLoginPage(root, cursor):
+
     def validate_login_a():
         check_counter = 0
         warn = ""
@@ -676,8 +676,11 @@ def AdminLoginPage(root, cursor):
     ws.title('Administrator Login')
     ws.config(bg='#e6bbad')
 
-    f = ('Times', 14)
+    for x in myresult:
+        tree.insert("", "end", values = x)
+    tree.grid(row = 1, column = 0)
 
+   
     left_frame = tkinter.Frame(
         ws,
         bd=2,
@@ -886,6 +889,7 @@ def ServiceStatusesPage(root, mycursor, adminID):
     mycursor.execute(sql2)
     myresult = mycursor.fetchall()
 
+
     tkinter.Label(text="Items under service", width=30, height="2",
                   font=("Calibri", 13)).grid(row=0, column=0)
 
@@ -915,18 +919,18 @@ def ServiceStatusesPage(root, mycursor, adminID):
 
 
 def UnpaidHomePage(root, mycursor, adminID):
-    sql3 = "\
-    SELECT customerID, itemID, requestID from request\
-    WHERE requestStatus = 'Submitted and Waiting for payment' \
-    UNION \
-    SELECT 'Total no. of unpaid customers', '', count(*) from request \
-    WHERE requestStatus = 'Submitted and Waiting for payment'"
+    sql3 = "SELECT C.customerID, C.customerName, C.email, C.address\
+        FROM customer AS C\
+        INNER JOIN request AS R ON R.customerID = C.customerID\
+        WHERE R.requestStatus = 'Submitted and Waiting for payment' "
 
     mycursor.execute(sql3)
     myresult = mycursor.fetchall()
 
-    tkinter.Label(text="Customers with unpaid service fees", width=30,
-                  height="2", font=("Calibri", 13)).grid(row=0, column=0)
+
+
+    tkinter.Label(text="Customers with unpaid service fees", width=50,
+                  height="2", font=("Calibri", 13)).grid(row=0, column=0, sticky='ew')
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1861,6 +1865,7 @@ def mysqlSelect(command, cursor):
     cursor.execute(command)
     result = cursor.fetchall()
     return result
+
 
 # Global variables
 customerName = ""
