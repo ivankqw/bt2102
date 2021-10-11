@@ -100,9 +100,9 @@ def init_fake(host='localhost',user='root',password=''):
 #create_db_mysql(password='')
 
 '''run these'''
-init_mysql(password="s9938580d")
-items_info_to_sql(password="s9938580d")
-products_info_to_sql(password="s9938580d")
-init_fake(password="s9938580d")
+'''init_mysql(password="s9935327i")
+items_info_to_sql(password="s9935327i")
+products_info_to_sql(password="s9935327i")
+init_fake(password="s9935327i")'''
 
 

@@ -920,18 +920,17 @@ def AdminSearchAllPage(root, cursor, adminID):
     ws.title('Choose a category!')
     ws.wm_geometry("1040x900")
     ws.config(bg='#add8e6')
-    tkinter.Label(text="Select category", bg='#add8e6').pack()
-    default_category = "No option selected"
-    # Category
+    '''# Category
     categories = [default_category, "Lights", "Locks"]
     category = tkinter.StringVar()
     category.set(categories[0])
     dropcat = tkinter.OptionMenu(root, category, *categories)
     dropcat.pack()
 
+    # Model
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="Select Light model:", bg='#add8e6').pack()
-    # Model
+
     lights = [default_category, "Light1", "Light2", "SmartHome1"]
     light = tkinter.StringVar()
     light.set(lights[0])
@@ -944,10 +943,47 @@ def AdminSearchAllPage(root, cursor, adminID):
     lock = tkinter.StringVar()
     lock.set(locks[0])
     droplock = tkinter.OptionMenu(root, lock, *locks)
-    droplock.pack()
+    droplock.pack()'''
 
+    # Category
+
+    tkinter.Label(text="Select Category:", bg='#add8e6').pack()
+    default_category = "No option selected"
+
+    def update_model_options(category_selected):
+        menu = dropmodels['menu']
+        menu.delete(0, 'end')
+        if category_selected == 'Lights':
+            selected_models = [default_category, 'Light1', 'Light2', 'SmartHome1']
+        elif category_selected == 'Locks':
+            selected_models = [default_category, 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+        else:
+            selected_models = [default_category, 'Light1', 'Light2', 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+        # models.set('No option selected')
+        for each_model in selected_models:
+            menu.add_command(label=each_model, command=lambda x=each_model: on_model_change(x))
+
+    category = tkinter.StringVar()
+    category_choices = [default_category, 'Lights', 'Locks']
+    category.set(category_choices[0])
+    dropcat = tkinter.OptionMenu(root, category, *category_choices, command=update_model_options)
+    # formatting: dropcat.config(bg='white', fg='black', width=15, relief=tkinter.GROOVE)
+    # dropcat.place(x=130, y=110)
+    dropcat.pack()
     tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Advanced Filter Options:", bg='#add8e6').pack()
+    tkinter.Label(text="Select Model:", bg='#add8e6').pack()
+
+    # Models
+    def on_model_change(model_selected):
+        models.set(model_selected)
+
+    models = tkinter.StringVar()
+    model_choices = [default_category, 'Light1', 'Light2', 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+    models.set(model_choices[0])
+    dropmodels = tkinter.OptionMenu(root, models, *model_choices, command=on_model_change)
+    dropmodels.pack()
+    #dropmodels.config(bg='white', fg='black', width=15, relief=tkinter.GROOVE)
+    #dropmodels.place(x=130, y=150)
 
     # Advanced options
 
@@ -958,7 +994,7 @@ def AdminSearchAllPage(root, cursor, adminID):
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black"]
     color = tkinter.StringVar()
-    color.set(locks[0])
+    color.set('No option selected')
     dropcolor = tkinter.OptionMenu(root, color, *colors)
     dropcolor.pack()
 
@@ -967,7 +1003,7 @@ def AdminSearchAllPage(root, cursor, adminID):
     tkinter.Label(text="Select Factory:", bg='#add8e6').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
     factory = tkinter.StringVar()
-    factory.set(locks[0])
+    factory.set('No option selected')
     dropfactory = tkinter.OptionMenu(root, factory, *factories)
     dropfactory.pack()
 
@@ -976,7 +1012,7 @@ def AdminSearchAllPage(root, cursor, adminID):
     tkinter.Label(text="Select Power Supply:", bg='#add8e6').pack()
     powersupplies = [default_category, "Battery", "USB"]
     powersupply = tkinter.StringVar()
-    powersupply.set(locks[0])
+    powersupply.set('No option selected')
     droppowersupply = tkinter.OptionMenu(root, powersupply, *powersupplies)
     droppowersupply.pack()
 
@@ -986,7 +1022,7 @@ def AdminSearchAllPage(root, cursor, adminID):
     prodyears = [default_category, "2014", "2015",
                  "2016", "2017", "2018", "2019", "2020", ]
     prodyear = tkinter.StringVar()
-    prodyear.set(locks[0])
+    prodyear.set('No option selected')
     dropprodyear = tkinter.OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
 
@@ -1015,7 +1051,7 @@ def AdminSearchAllPage(root, cursor, adminID):
     tkinter.Label(text="", bg='#add8e6').pack()
 
     tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
-                   command=lambda: AdminSimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options, adminID) 
+                   command=lambda: AdminSimpleSearchResult(root, cursor, category.get(), (models.get() if category.get() == "Lights" else models.get()), advanced_options, adminID) 
                    ).pack()
                    ##if areThereSearchResults() else messagebox.showinfo('No search results!')
     tkinter.Label(text="", bg='#add8e6').pack()
@@ -1504,9 +1540,8 @@ def SearchPage(root, cursor, customerID):
     ws.title('Choose a category!')
     ws.wm_geometry("1040x900")
     ws.config(bg='#add8e6')
-    tkinter.Label(text="Select category", bg='#add8e6').pack()
-    default_category = "No option selected"
-    # Category
+    
+    '''# Category
     categories = [default_category, "Lights", "Locks"]
     category = tkinter.StringVar()
     category.set(categories[0])
@@ -1521,14 +1556,53 @@ def SearchPage(root, cursor, customerID):
     light.set(lights[0])
     droplight = tkinter.OptionMenu(root, light, *lights)
     droplight.pack()
-
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="Select Lock model:", bg='#add8e6').pack()
     locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
     lock = tkinter.StringVar()
     lock.set(locks[0])
     droplock = tkinter.OptionMenu(root, lock, *locks)
-    droplock.pack()
+    droplock.pack()'''
+
+    # Category
+    tkinter.Label(text="Select Category:", bg='#add8e6').pack()
+    default_category = "No option selected"
+
+    def update_model_options(category_selected):
+        menu = dropmodels['menu']
+        menu.delete(0, 'end')
+        if category_selected == 'Lights':
+            selected_models = [default_category, 'Light1', 'Light2', 'SmartHome1']
+        elif category_selected == 'Locks':
+            selected_models = [default_category, 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+        else:
+            selected_models = [default_category, 'Light1', 'Light2', 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+        # models.set('No option selected')
+        for each_model in selected_models:
+            menu.add_command(label=each_model, command=lambda x=each_model: on_model_change(x))
+
+    category = tkinter.StringVar()
+    category_choices = [default_category, 'Lights', 'Locks']
+    category.set(category_choices[0])
+    dropcat = tkinter.OptionMenu(root, category, *category_choices, command=update_model_options)
+    # formatting: dropcat.config(bg='white', fg='black', width=15, relief=tkinter.GROOVE)
+    # dropcat.place(x=130, y=110)
+    dropcat.pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Select Model:", bg='#add8e6').pack()
+
+    # Models
+    def on_model_change(model_selected):
+        models.set(model_selected)
+
+    models = tkinter.StringVar()
+    model_choices = [default_category, 'Light1', 'Light2', 'Safe1', 'Safe2', 'Safe3', 'SmartHome1']
+    models.set(model_choices[0])
+    dropmodels = tkinter.OptionMenu(root, models, *model_choices, command=on_model_change)
+    dropmodels.pack()
+    #dropmodels.config(bg='white', fg='black', width=15, relief=tkinter.GROOVE)
+    #dropmodels.place(x=130, y=150)
+
 
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="Advanced Filter Options:", bg='#add8e6').pack()
@@ -1542,7 +1616,7 @@ def SearchPage(root, cursor, customerID):
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black"]
     color = tkinter.StringVar()
-    color.set(locks[0])
+    color.set(models[0])
     dropcolor = tkinter.OptionMenu(root, color, *colors)
     dropcolor.pack()
 
@@ -1551,7 +1625,7 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="Select Factory:", bg='#add8e6').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
     factory = tkinter.StringVar()
-    factory.set(locks[0])
+    factory.set(models[0])
     dropfactory = tkinter.OptionMenu(root, factory, *factories)
     dropfactory.pack()
 
@@ -1560,7 +1634,7 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="Select Power Supply:", bg='#add8e6').pack()
     powersupplies = [default_category, "Battery", "USB"]
     powersupply = tkinter.StringVar()
-    powersupply.set(locks[0])
+    powersupply.set(models[0])
     droppowersupply = tkinter.OptionMenu(root, powersupply, *powersupplies)
     droppowersupply.pack()
 
@@ -1570,7 +1644,7 @@ def SearchPage(root, cursor, customerID):
     prodyears = [default_category, "2014", "2015",
                  "2016", "2017", "2018", "2019", "2020", ]
     prodyear = tkinter.StringVar()
-    prodyear.set(locks[0])
+    prodyear.set(models[0])
     dropprodyear = tkinter.OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
 
@@ -1607,9 +1681,9 @@ def SearchPage(root, cursor, customerID):
         if category.get() != default_category:
             find_dict['Category'] = category.get()
         if category.get() == "Lights" and category.get() != default_category:
-            find_dict['Model'] = light.get()
+            find_dict['Model'] = models.get()
         if category.get() == "Locks" and category.get() != default_category:
-            find_dict['Model'] = lock.get()
+            find_dict['Model'] = models.get()
         if color != default_category:
             find_dict['Color'] = color
         if factory != default_category:
@@ -1628,7 +1702,7 @@ def SearchPage(root, cursor, customerID):
             return False
         return True
     tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
-                   command=lambda: SimpleSearchResult(root, cursor, category.get(), (light.get() if category.get() == "Lights" else lock.get()), advanced_options, customerID) 
+                   command=lambda: SimpleSearchResult(root, cursor, category.get(), (models.get() if category.get() == "Lights" else models.get()), advanced_options, customerID) 
                    ).pack()
                    ##if areThereSearchResults() else messagebox.showinfo('No search results!')
     tkinter.Label(text="", bg='#add8e6').pack()
@@ -2220,7 +2294,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9938580d"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9935327i"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
