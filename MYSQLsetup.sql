@@ -42,6 +42,8 @@ CREATE TABLE Item(
     purchaseStatus	    VARCHAR(255)	NOT NULL,
     serviceStatus	    VARCHAR(255)	NOT NULL,
     dateOfPurchase      DATE            ,           -- NULL if not purchased
+    category            VARCHAR(255)    ,
+    model               VARCHAR(255)    ,
     PRIMARY KEY (itemID),
     FOREIGN KEY (productID) REFERENCES Product(productID),
     FOREIGN KEY (adminID) REFERENCES Administrator(adminID),

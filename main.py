@@ -1162,36 +1162,47 @@ def AdminSimpleSearchResult(root, cursor, cat, mod, advanced_options, adminID):
     return
 
 def InventoryHomePage(root, mycursor, adminID):
-    sql1 = "SELECT A.productID, A.Sold, B.Unsold \
-    FROM (SELECT productID, COUNT(purchaseStatus) as Sold \
-    FROM item \
-    WHERE purchaseStatus = 'Sold' \
-    GROUP by productID) AS A \
-    CROSS JOIN(SELECT productID, COUNT(purchaseStatus) as Unsold \
-    FROM item \
-    WHERE purchaseStatus = 'Unsold' \
-    GROUP by productID) AS B \
-    ON A.productID = B.productID"
-    mycursor.execute(sql1)
-    myresult = mycursor.fetchall()
+    #by model
+    sql1 = "SELECT A.category, A.model, A.Sold, B.Unsold\
+    FROM (SELECT category, model, COUNT(purchaseStatus) as Sold\
+    FROM item\
+    WHERE purchaseStatus = 'Sold'\
+    GROUP by category, model) AS A\
+    CROSS JOIN(SELECT category, model, COUNT(purchaseStatus) as Unsold\
+    FROM item\
+    WHERE purchaseStatus = 'Unsold'\
+    GROUP by category, model) AS B\
+    ON A.model = B.model and A.category = B.category;"
 
-    tkinter.Label(text="Items in Inventory", width=30, height="2",
+    #by category
+    sql2 = "SELECT A.category, A.Sold, B.Unsold FROM (SELECT category, COUNT(purchaseStatus) as Sold\
+    FROM item WHERE purchaseStatus = 'Sold'\
+    GROUP by category) AS A CROSS JOIN(SELECT category, COUNT(purchaseStatus) as Unsold\
+    FROM item WHERE purchaseStatus = 'Unsold'\
+    GROUP by category) AS B ON A.category = B.category;"
+
+    mycursor.execute(sql1)
+    myresult1 = mycursor.fetchall()
+
+    tkinter.Label(text="Products by model", width=30, height="2",
                   font=("Calibri", 13)).grid(row=0, column=0)
 
     style = ttk.Style()
     style.theme_use('default')
     tree = ttk.Treeview(columns=(
-        'IID', 'Number of SOLD items', 'Number of UNSOLD items'), show='headings')
+        'Category','Model', 'Number of SOLD items', 'Number of UNSOLD items'), show='headings')
 
     root.title('Inventory')
     tree.column("#1", anchor=CENTER, width=195)
-    tree.heading('#1', text='IID')
+    tree.heading('#1', text='Category')
     tree.column("#2", anchor=CENTER, width=195)
-    tree.heading('#2', text='Number of SOLD items')
+    tree.heading('#2', text='Model')
     tree.column("#3", anchor=CENTER, width=195)
-    tree.heading('#3', text='Number of UNSOLD items')
+    tree.heading('#3', text='Number of SOLD items')
+    tree.column("#4", anchor=CENTER, width=195)
+    tree.heading('#4', text='Number of UNSOLD items')
 
-    for x in myresult:
+    for x in myresult1:
         tree.insert("", "end", values=x)
     tree.grid(row=1, column=0)
 
@@ -1199,8 +1210,38 @@ def InventoryHomePage(root, mycursor, adminID):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=1, sticky="ns")
 
+
+
+    mycursor.execute(sql2)
+    myresult2 = mycursor.fetchall()
+
+    tkinter.Label(text="Products by category", width=30, height="2",
+                  font=("Calibri", 13)).grid(row=3, column=0)
+
+    style = ttk.Style()
+    style.theme_use('default')
+    tree = ttk.Treeview(columns=(
+        'Category', 'Number of SOLD items', 'Number of UNSOLD items'), show='headings')
+
+    #root.title('Inventory')
+    tree.column("#1", anchor=CENTER, width=260)
+    tree.heading('#1', text='Category')
+    tree.column("#2", anchor=CENTER, width=260)
+    tree.heading('#2', text='Number of SOLD items')
+    tree.column("#3", anchor=CENTER, width=260)
+    tree.heading('#3', text='Number of UNSOLD items')
+
+    for x in myresult2:
+        tree.insert("", "end", values=x)
+    tree.grid(row=4, column=0)
+
+    scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.grid(row=4, column=1, sticky="ns")
+
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=5, column=0)
+
 
 
 def ServiceStatusesPage(root, mycursor, adminID):

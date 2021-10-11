@@ -64,7 +64,7 @@ def items_info_to_sql(password):
                 return i['ProductID']
     items_df = pd.read_json('items.json')
     items_df['productID'] = items_df.apply(lambda row : getProductID(row.Category, row.Model), axis=1)
-    items_sql_df = items_df[["ItemID", "PurchaseStatus", "ServiceStatus", "productID"]]
+    items_sql_df = items_df[["ItemID", "PurchaseStatus", "ServiceStatus", "productID", "Category", "Model"]]
     
     engine = create_engine("mysql+pymysql://{user}:{pw}@localhost/{db}"
                         .format(user="root",
