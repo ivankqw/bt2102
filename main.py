@@ -1657,7 +1657,7 @@ def SearchPage(root, cursor, customerID):
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black"]
     color = tkinter.StringVar()
-    color.set(models[0])
+    color.set(colors[0])
     dropcolor = tkinter.OptionMenu(root, color, *colors)
     dropcolor.pack()
 
@@ -1666,7 +1666,7 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="Select Factory:", bg='#add8e6').pack()
     factories = [default_category, "Malaysia", "China", "Philippines"]
     factory = tkinter.StringVar()
-    factory.set(models[0])
+    factory.set(factories[0])
     dropfactory = tkinter.OptionMenu(root, factory, *factories)
     dropfactory.pack()
 
@@ -1675,7 +1675,7 @@ def SearchPage(root, cursor, customerID):
     tkinter.Label(text="Select Power Supply:", bg='#add8e6').pack()
     powersupplies = [default_category, "Battery", "USB"]
     powersupply = tkinter.StringVar()
-    powersupply.set(models[0])
+    powersupply.set(powersupplies[0])
     droppowersupply = tkinter.OptionMenu(root, powersupply, *powersupplies)
     droppowersupply.pack()
 
@@ -1685,7 +1685,7 @@ def SearchPage(root, cursor, customerID):
     prodyears = [default_category, "2014", "2015",
                  "2016", "2017", "2018", "2019", "2020", ]
     prodyear = tkinter.StringVar()
-    prodyear.set(models[0])
+    prodyear.set(prodyears[0])
     dropprodyear = tkinter.OptionMenu(root, prodyear, *prodyears)
     dropprodyear.pack()
 
@@ -2335,7 +2335,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "s9935327i"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -2344,7 +2344,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
