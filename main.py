@@ -1168,7 +1168,7 @@ def InventoryHomePage(root, mycursor, adminID):
     FROM item\
     WHERE purchaseStatus = 'Sold'\
     GROUP by category, model) AS A\
-    CROSS JOIN(SELECT category, model, COUNT(purchaseStatus) as Unsold\
+    LEFT JOIN(SELECT category, model, COUNT(purchaseStatus) as Unsold\
     FROM item\
     WHERE purchaseStatus = 'Unsold'\
     GROUP by category, model) AS B\
@@ -1177,7 +1177,7 @@ def InventoryHomePage(root, mycursor, adminID):
     #by category
     sql2 = "SELECT A.category, A.Sold, B.Unsold FROM (SELECT category, COUNT(purchaseStatus) as Sold\
     FROM item WHERE purchaseStatus = 'Sold'\
-    GROUP by category) AS A CROSS JOIN(SELECT category, COUNT(purchaseStatus) as Unsold\
+    GROUP by category) AS A LEFT JOIN(SELECT category, COUNT(purchaseStatus) as Unsold\
     FROM item WHERE purchaseStatus = 'Unsold'\
     GROUP by category) AS B ON A.category = B.category;"
 
@@ -1203,6 +1203,12 @@ def InventoryHomePage(root, mycursor, adminID):
     tree.heading('#4', text='Number of UNSOLD items')
 
     for x in myresult1:
+        y = list(x)
+        if y[2] is None:
+            y[2] = 0
+        if y[3] is None:
+            y[3] = 0
+        x = tuple(y)
         tree.insert("", "end", values=x)
     tree.grid(row=1, column=0)
 
@@ -1232,6 +1238,12 @@ def InventoryHomePage(root, mycursor, adminID):
     tree.heading('#3', text='Number of UNSOLD items')
 
     for x in myresult2:
+        y = list(x)
+        if y[1] is None:
+            y[1] = 0
+        if y[2] is None:
+            y[2] = 0
+        x = tuple(y)
         tree.insert("", "end", values=x)
     tree.grid(row=4, column=0)
 
