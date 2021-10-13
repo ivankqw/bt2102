@@ -159,6 +159,10 @@ def AdminSignUpPage(root, cursor, db):
                 ), var.get(), register_mobile.get(), register_pwd.get()))
                 db.commit()
                 adminID = str(cursor.lastrowid)
+                register_name.delete(0, tkinter.END)
+                register_mobile.delete(0, tkinter.END)
+                register_pwd.delete(0, tkinter.END)
+                pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Admin ID is ' + adminID + '. Please go back to the main page to Log in as an Administrator!')
                 tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,
@@ -369,6 +373,12 @@ def CustomerSignUpPage(root, cursor, db):
                 ), register_mobile.get(), var.get(), register_address.get(), register_email.get()))
                 db.commit()
                 customerID = str(cursor.lastrowid)
+                register_name.delete(0, tkinter.END)
+                register_email.delete(0, tkinter.END)
+                register_mobile.delete(0, tkinter.END)
+                register_address.delete(0, tkinter.END)
+                register_pwd.delete(0, tkinter.END)
+                pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Customer ID is ' + customerID + '. Please go back to the main page to log in as a Customer!')
                 tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,
