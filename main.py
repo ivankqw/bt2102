@@ -36,6 +36,7 @@ def LandingPage(root):
     tkinter.Label(text="", bg='#0B5A81').pack()
     tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,cursor='hand2', command= lambda: changepage("loginAdmin")).pack() """
     root.configure(bg="#ffffff")
+    root.title("OSHES app")
 
     canvas = tkinter.Canvas(
         root,
@@ -1109,7 +1110,7 @@ def AdminSimpleSearchResult(root, cursor, cat, mod, advanced_options, adminID):
     tree = ttk.Treeview(root, columns=columns, show='headings')
     for i in range(len(columns)):
         tree.column("#{}".format(i+1), anchor=CENTER,
-                    minwidth=0, width=100, stretch=tkinter.NO)
+                    minwidth=0, width=93, stretch=tkinter.NO)
         tree.heading("#{}".format(i+1), text=columns[i])
 
     item_sold_count = 0
@@ -1319,9 +1320,9 @@ def UnpaidHomePage(root, mycursor, adminID):
     tree.column("#1", anchor=CENTER, width=195)
     tree.heading('#1', text='Customer ID')
     tree.column("#2", anchor=CENTER, width=195)
-    tree.heading('#2', text='Item ID')
+    tree.heading('#2', text='Customer Name')
     tree.column("#3", anchor=CENTER, width=195)
-    tree.heading('#3', text='Request ID')
+    tree.heading('#3', text='Customer Email')
 
     for x in myresult:
         tree.insert("", "end", values=x)
@@ -2099,7 +2100,7 @@ def CustomerItemsPage(root, cursor, customerID):
                         'Service Status', 'Date Of Purchase'), show='headings')
     tree.pack()
 
-    root.title('Approval Page')
+    root.title('Customer Items Page')
     tree.column('#1', anchor=CENTER, width='100')
     tree.heading('#1', text='Item ID')
     tree.column('#2', anchor=CENTER, width='100')
@@ -2115,7 +2116,7 @@ def CustomerItemsPage(root, cursor, customerID):
         for i in table_info:
             tree.insert("", "end", values=i)
 
-    tkinter.Label(text="", bg='#e6bbad').pack()
+    tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Back To Customer Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
                    cursor='hand2', command=lambda: changepage("customerHomePage", customerID)).pack(side=tkinter.BOTTOM)
     return 
