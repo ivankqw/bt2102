@@ -2099,32 +2099,39 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     mydb.commit()
 
 def CustomerItemsPage(root, cursor, customerID):
-    sql_statement = "SELECT itemID, productID, serviceStatus, dateOfPurchase FROM item where customerID = '%s' "
+    sql_statement = "SELECT itemID FROM item where customerID = '%s' "
     cursor.execute(sql_statement % customerID)
     table_info = cursor.fetchall()
     cursor.reset()
 
     style = ttk.Style()
     style.theme_use('default')
-    tree = ttk.Treeview(root, columns=('Item ID', 'Product ID',
-                        'Service Status', 'Date Of Purchase'), show='headings')
+    columns = ('ItemID', 'Category', 'Model', 'Color', 'Factory', 'PowerSupply',
+               'ProductionYear', 'Price', 'Warranty (months)')
+    tree = ttk.Treeview(root, columns=columns, show='headings')
     tree.pack()
 
     root.title('Customer Items Page')
-    tree.column('#1', anchor=CENTER, width='100')
-    tree.heading('#1', text='Item ID')
-    tree.column('#2', anchor=CENTER, width='100')
-    tree.heading('#2', text='Product ID')
-    tree.column('#3', anchor=CENTER, width='100')
-    tree.heading('#3', text='Service Status')
-    tree.column('#4', anchor=CENTER, width='100')
-    tree.heading('#4', text='Date Of Purchase')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER,
+                    minwidth=0, width=100, stretch=tkinter.NO)
+        tree.heading("#{}".format(i+1), text=columns[i]) 
 
     if table_info == []:
         messagebox.showinfo('Oh no!', 'You did not purchase any items!')
     else:
-        for i in table_info:
-            tree.insert("", "end", values=i)
+        for itemID in table_info:
+            for item in items.find({"ItemID" : itemID[0]}):
+                cat = item['Category']
+                mod = item['Model']
+                col = item['Color']
+                fact = item['Factory']
+                powersup = item['PowerSupply']
+                prodyear = item['ProductionYear']
+                price = itemPriceWarrantyCost(cat, mod)[0]
+                warranty = itemPriceWarrantyCost(cat, mod)[1]
+                values = (itemID[0], cat, mod, col, fact, powersup, prodyear, price, warranty)
+                tree.insert("", "end", values=values)  
 
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Back To Customer Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
@@ -2358,7 +2365,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9938580d"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -2367,7 +2374,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
