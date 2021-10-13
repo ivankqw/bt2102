@@ -159,10 +159,6 @@ def AdminSignUpPage(root, cursor, db):
                 ), var.get(), register_mobile.get(), register_pwd.get()))
                 db.commit()
                 adminID = str(cursor.lastrowid)
-                register_name.delete(0, tkinter.END)
-                register_mobile.delete(0, tkinter.END)
-                register_pwd.delete(0, tkinter.END)
-                pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Admin ID is ' + adminID + '. Please go back to the main page to Log in as an Administrator!')
                 tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,
@@ -373,12 +369,6 @@ def CustomerSignUpPage(root, cursor, db):
                 ), register_mobile.get(), var.get(), register_address.get(), register_email.get()))
                 db.commit()
                 customerID = str(cursor.lastrowid)
-                register_name.delete(0, tkinter.END)
-                register_email.delete(0, tkinter.END)
-                register_mobile.delete(0, tkinter.END)
-                register_address.delete(0, tkinter.END)
-                register_pwd.delete(0, tkinter.END)
-                pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Customer ID is ' + customerID + '. Please go back to the main page to log in as a Customer!')
                 tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,
@@ -1195,8 +1185,10 @@ def InventoryHomePage(root, mycursor, adminID):
     mycursor.execute(sql1)
     myresult1 = mycursor.fetchall()
 
+    tkinter.Label(text = "", width = 15, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=0, column=0)
+
     tkinter.Label(text="Products by model", width=30, height="2",
-                  font=("Calibri", 13)).grid(row=0, column=0)
+                  font=("Calibri", 13)).grid(row=0, column=1)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1221,19 +1213,20 @@ def InventoryHomePage(root, mycursor, adminID):
             y[3] = 0
         x = tuple(y)
         tree.insert("", "end", values=x)
-    tree.grid(row=1, column=0)
+    tree.grid(row=1, column=1)
 
     scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky="ns")
+    scrollbar.grid(row=1, column=2, sticky="ns")
 
 
 
     mycursor.execute(sql2)
     myresult2 = mycursor.fetchall()
 
+    tkinter.Label(text = "", width = 15, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=3, column=0)
     tkinter.Label(text="Products by category", width=30, height="2",
-                  font=("Calibri", 13)).grid(row=3, column=0)
+                  font=("Calibri", 13)).grid(row=3, column=1)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1256,14 +1249,14 @@ def InventoryHomePage(root, mycursor, adminID):
             y[2] = 0
         x = tuple(y)
         tree.insert("", "end", values=x)
-    tree.grid(row=4, column=0)
+    tree.grid(row=4, column=1)
 
     scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=4, column=1, sticky="ns")
+    scrollbar.grid(row=4, column=2, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=5, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=5, column=1)
 
 
 
@@ -1278,9 +1271,10 @@ def ServiceStatusesPage(root, mycursor, adminID):
     mycursor.execute(sql2)
     myresult = mycursor.fetchall()
 
+    tkinter.Label(text = "", width = 25, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=0, column=0)
 
     tkinter.Label(text="Items under service", width=30, height="2",
-                  font=("Calibri", 13)).grid(row=0, column=0)
+                  font=("Calibri", 13)).grid(row=0, column=1)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1297,14 +1291,14 @@ def ServiceStatusesPage(root, mycursor, adminID):
 
     for x in myresult:
         tree.insert("", "end", values=x)
-    tree.grid(row=1, column=0)
+    tree.grid(row=1, column=1)
 
     scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky="ns")
+    scrollbar.grid(row=1, column=2, sticky="ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
+    tkinter.Button(text="Back to Admin", height="2", width="25", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=1)
 
 
 def UnpaidHomePage(root, mycursor, adminID):
@@ -1317,9 +1311,10 @@ def UnpaidHomePage(root, mycursor, adminID):
     myresult = mycursor.fetchall()
 
 
+    tkinter.Label(text = "", width = 25, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=0, column=0)
 
-    tkinter.Label(text="Customers with unpaid service fees", width=50,
-                  height="2", font=("Calibri", 13)).grid(row=0, column=0, sticky='ew')
+    tkinter.Label(text="Customers with unpaid service fees", width=30,
+                  height="2", font=("Calibri", 13)).grid(row=0, column=1)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1336,14 +1331,14 @@ def UnpaidHomePage(root, mycursor, adminID):
 
     for x in myresult:
         tree.insert("", "end", values=x)
-    tree.grid(row=1, column=0)
+    tree.grid(row=1, column=1)
 
     scrollbar = ttk.Scrollbar(orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky="ns")
+    scrollbar.grid(row=1, column=2, sticky="ns")
 
     tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=0)
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=1)
 
 
 def CustomerHomePage(root, cursor, customerID):
@@ -1904,8 +1899,9 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
 def CustomerAllRequestsPage(root, cursor, customerID):
     root.title("Customer Request Page")
     f = ('Calibri', 13)
-    tkinter.Label(text="All my Requests :)",
-                  bg='#CCCCCC', font=f).grid(row=0, column=0)
+    tkinter.Label(text = "", width = 40, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
+    tkinter.Label(text="All my Requests :)", width = 30,
+                  bg='#CCCCCC', font=f).grid(row=0, column=1)
     reqSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s"
     cursor.execute(reqSQL, (customerID,))
     req = cursor.fetchall()
@@ -1922,21 +1918,23 @@ def CustomerAllRequestsPage(root, cursor, customerID):
     for item in req:
         tree.insert("", "end", values=item)
 
-    tree.grid(row=1, column=0, sticky='nsew')
+    tree.grid(row=1, column=1, sticky='nsew')
     scrollbar = ttk.Scrollbar(
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky='ns')
+    scrollbar.grid(row=1, column=2, sticky='ns')
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=0)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
     return
 
 
 def CustomerCancelRequestPage(root, cursor, customerID):
     root.title("Customer Request Page")
     f = ('Calibri', 13)
-    tkinter.Label(text="Requests that I can cancel :)",
-                  bg='#CCCCCC', font=f).grid(row=0, column=0)
+    tkinter.Label(text = "", width = 30, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
+
+    tkinter.Label(text="Requests that I can cancel :)", width = 30,
+                  bg='#CCCCCC', font=f).grid(row=0, column=1)
     reqToCancelSQL = "SELECT requestID, requestDate, requestStatus FROM request WHERE customerID = %s\
                       AND requestStatus != 'Approved'\
                       AND requestStatus != 'Canceled'\
@@ -1960,15 +1958,15 @@ def CustomerCancelRequestPage(root, cursor, customerID):
     for item in reqToCancel:
         tree.insert("", "end", values=item)
 
-    tree.grid(row=1, column=0, sticky='nsew')
+    tree.grid(row=1, column=1, sticky='nsew')
     scrollbar = ttk.Scrollbar(
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky='ns')
+    scrollbar.grid(row=1, column=2, sticky='ns')
     tkinter.Button(text="CANCEL SELECTED REQUESTS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: cancel_selected(tree.selection(), customerID)).grid(row=2, column=0)
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: cancel_selected(tree.selection(), customerID)).grid(row=2, column=1)
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=0)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
     
     def cancel_selected(selected_items, customerID):
         cancel_info = []
@@ -1990,8 +1988,9 @@ def CustomerCancelRequestPage(root, cursor, customerID):
 def CustomerRequestPage(root, cursor, customerID):
     root.title("Customer Request Page")
     f = ('Calibri', 13)
+    tkinter.Label(text = "", width = 25, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
     tkinter.Label(text="Items that I can make Requests for :)",
-                  bg='#CCCCCC', font=f).grid(row=0, column=0)
+                  bg='#CCCCCC', font=f).grid(row=0, column=1)
     itemsToRequestSQL = "SELECT productID, i.itemID, dateOfPurchase FROM item i left join request re on re.itemid = i.itemid and re.customerid = i.customerid where i.customerid = %s and (servicestatus = %s and (requeststatus != 'Submitted and Waiting for payment' or requeststatus is null))"
     cursor.execute(itemsToRequestSQL, (customerID, ""))
     itemsToRequest = cursor.fetchall()
@@ -2020,15 +2019,15 @@ def CustomerRequestPage(root, cursor, customerID):
     for item in itemsToRequest:
         tree.insert("", "end", values=item)
 
-    tree.grid(row=1, column=0, sticky='nsew')
+    tree.grid(row=1, column=1, sticky='nsew')
     scrollbar = ttk.Scrollbar(
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=1, column=1, sticky='ns')
+    scrollbar.grid(row=1, column=2, sticky='ns')
     tkinter.Button(text="REQUEST SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: req_selected(tree.selection(), customerID)).grid(row=2, column=0)
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: req_selected(tree.selection(), customerID)).grid(row=2, column=1)
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=0)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
     
     def req_selected(selected_items, customerID):
         req_info = []
@@ -2358,7 +2357,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "Juhi123#"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -2367,7 +2366,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
