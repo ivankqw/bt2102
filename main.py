@@ -108,7 +108,6 @@ def LandingPage(root):
     root.mainloop()
     return
 
-
 def AdminSignUpPage(root, cursor, db):
     def validate_signup_admin():
         check_counter = 0
@@ -153,6 +152,7 @@ def AdminSignUpPage(root, cursor, db):
             warn += "Passwords not matching!"
         else:
             check_counter += 1
+        global but
         if check_counter == 7:
             try:
                 cursor.execute(insert_statement, (register_name.get(
@@ -165,8 +165,10 @@ def AdminSignUpPage(root, cursor, db):
                 pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Admin ID is ' + adminID + '. Please go back to the main page to Log in as an Administrator!')
-                tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,
-                               cursor='hand2', command=lambda: changepage("loginAdmin")).pack()
+                if but:
+                    tkinter.Button(text="Admin Login", height="2", width="30", relief=tkinter.SOLID,
+                                cursor='hand2', command=lambda: changepage("loginAdmin")).pack()
+                but = False
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -367,6 +369,7 @@ def CustomerSignUpPage(root, cursor, db):
             warn += "Passwords not matching!"
         else:
             check_counter += 1
+        global but
         if check_counter == 9:
             try:
                 cursor.execute(insert_statement, (register_name.get(), register_pwd.get(
@@ -381,8 +384,10 @@ def CustomerSignUpPage(root, cursor, db):
                 pwd_again.delete(0, tkinter.END)
                 messagebox.showinfo(
                     'Confirmation', 'You have successfully registered! Your Customer ID is ' + customerID + '. Please go back to the main page to log in as a Customer!')
-                tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,
-                               cursor='hand2', command=lambda: changepage("loginCustomer")).pack()
+                if but:
+                    tkinter.Button(text="Customer Login", height="2", width="30", relief=tkinter.SOLID,
+                                cursor='hand2', command=lambda: changepage("loginCustomer")).pack()
+                but = False
             except Exception as e:
                 messagebox.showerror('', e)
         else:
@@ -530,7 +535,7 @@ def CustomerSignUpPage(root, cursor, db):
         cursor='hand2',
         command=validate_signup
     )
-
+    but = True
     tkinter.Label(text="Welcome New Customer! :)", width="300",
                   height="2", font=("Calibri", 13)).pack()
     tkinter.Label(text="", bg='#add8e6').pack()
@@ -2385,14 +2390,18 @@ def itemPriceWarrantyCost(cat, mod):
     cost = d['Cost ($)']
     return (price, warranty, cost)
 
+but = True
 def changepage(other, optional="", anotheroptional =""):
+    global but
     global currpage, root
     for widget in root.winfo_children():
         widget.destroy()
     if other == "registerCustomer":
+        but = True
         CustomerSignUpPage(root, mycursor, mydb)
         currpage = "registerCustomer"
     elif other == "registerAdmin":
+        but = True
         AdminSignUpPage(root, mycursor, mydb)
         currpage = "registerAdmin"
     elif other == "loginCustomer":
