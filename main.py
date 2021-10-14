@@ -2098,32 +2098,68 @@ def getAndRequestItem(itemID, customerID, itemPastWarranty, serviceFee):
     mydb.commit()
 
 def CustomerItemsPage(root, cursor, customerID):
-    sql_statement = "SELECT itemID, productID, serviceStatus, dateOfPurchase FROM item where customerID = '%s' "
-    cursor.execute(sql_statement % customerID)
+    sql_statement = "SELECT itemID, productID, serviceStatus, dateOfPurchase, category, model FROM item where customerID = '%s' "
+    cursor.execute(sql_statement, (customerID,))
     table_info = cursor.fetchall()
     cursor.reset()
 
+    for i in range(len(table_info)):
+        itemID = table_info[i][0]
+        productID = table_info[i][1]
+        serviceStatus = table_info[i][2]
+        dateOfPurchase = table_info[i][3]
+        category = table_info[i][4]
+        model = table_info[i][5]
+       
+        d = list(items.find({"ItemID": str(itemID)}))[0]
+        color = d['Color']
+        factory = d['Factory']        
+        powersupply = d['PowerSupply']
+        productionyear = d['ProductionYear']
+        d2 = list(products.find({"ProductID" : productID}))[0]
+        warranty = d2['Warranty (months)']
+        price = d2['Price ($)']
+        table_info[i] = (itemID, productID, serviceStatus, dateOfPurchase,
+                        category, model, color, factory, powersupply,
+                        productionyear, price, warranty)
+
     style = ttk.Style()
     style.theme_use('default')
-    tree = ttk.Treeview(root, columns=('Item ID', 'Product ID',
-                        'Service Status', 'Date Of Purchase'), show='headings')
+    columns = ('Item ID', 'Product ID',
+                        'Service Status', 'Date Of Purchase',
+                        'Category', 'Model', 'Color',
+                        'Factory', 'PowerSupply', 'ProductionYear',
+                        'Price', 'Warranty (months)')
+    tree = ttk.Treeview(root, columns=columns, show='headings')
+    for i in range(len(columns)):
+        tree.column("#{}".format(i+1), anchor=CENTER,
+                    minwidth=0, width=85, stretch=tkinter.NO)
+        tree.heading("#{}".format(i+1), text=columns[i])
     tree.pack()
 
-    root.title('Customer Items Page')
-    tree.column('#1', anchor=CENTER, width='100')
-    tree.heading('#1', text='Item ID')
-    tree.column('#2', anchor=CENTER, width='100')
-    tree.heading('#2', text='Product ID')
-    tree.column('#3', anchor=CENTER, width='100')
-    tree.heading('#3', text='Service Status')
-    tree.column('#4', anchor=CENTER, width='100')
-    tree.heading('#4', text='Date Of Purchase')
+    if table_info == []:
+        messagebox.showinfo('Oh no!', 'You did not purchase any items!')
+    else:
+        for item in table_info:
+            tree.insert("", "end", values=item)
 
+    root.title('Customer Items Page')
+    #tree.column('#1', anchor=CENTER, width='100')
+    #tree.heading('#1', text='Item ID')
+    #tree.column('#2', anchor=CENTER, width='100')
+    #tree.heading('#2', text='Product ID')
+    #tree.column('#3', anchor=CENTER, width='100')
+    #tree.heading('#3', text='Service Status')
+    #tree.column('#4', anchor=CENTER, width='100')
+    #tree.heading('#4', text='Date Of Purchase')
+
+    '''
     if table_info == []:
         messagebox.showinfo('Oh no!', 'You did not purchase any items!')
     else:
         for i in table_info:
             tree.insert("", "end", values=i)
+    '''
 
     tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Button(text="Back To Customer Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
@@ -2357,7 +2393,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "Juhi123#"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -2366,7 +2402,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['Inventory']  # the name of your mongodb database here
+mongo = client['testdb']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
