@@ -1,5 +1,5 @@
 import tkinter
-from tkinter.constants import CENTER, TRUE
+from tkinter.constants import BOTTOM, CENTER, TRUE
 import tkinter.messagebox as messagebox
 from tkscrolledframe import ScrolledFrame
 from PIL import ImageTk, Image
@@ -782,7 +782,7 @@ def AdminHomePage(root, cursor, adminID):
         return True
         
     tkinter.Button(text="Service Items", height="2", width="30", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items im progress of service')).pack()
+                   cursor='hand2', command=lambda: changepage("serviceItemsPage", adminID) if areThereItemsToService() else messagebox.showinfo('Good news!', 'No items waiting to be serviced')).pack()
     tkinter.Label(text="", bg='#e6bbad').pack()
     ##INITIALIZE DATA
     def init_database():
@@ -851,26 +851,30 @@ def AdminSearchAllOrOnePage(root, cursor, adminID):
             changepage("adminSearchForOnePage", itemID, adminID)
 
     ws = root
-    ws.title('Admin - Home')
+    ws.title('Admin - Search')
     ws.config(bg='#add8e6')
-    #tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + str(
-        #currCustomerID) + "]", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(ws, text="Welcome, [AdminID: " + str(
+        adminID) + "]", width="300", height="2", font=("Calibri", 13)).pack()      
     tkinter.Label(ws, text="", bg='#add8e6').pack()
-    tkinter.Button(ws, text="Search multiple items", height="2", width="30",
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
+    tkinter.Button(ws, text="Filter & Search for Multiple Items", height="2", width="30",
                    relief=tkinter.SOLID, command=lambda: changepage("adminSearchAllPage", adminID)).pack()
     tkinter.Label(ws, text="", bg='#add8e6').pack()
-    tkinter.Label(ws, text="Please enter Item ID",
+    tkinter.Label(ws, text="", bg='#add8e6').pack()               
+    tkinter.Label(ws, text="If you wish to search for a specific item, please enter Item ID below:",
                   width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
     # for buy entry
     f = ('Times', 14)
     tkinter.Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
     itemid = tkinter.Entry(ws, font=f)
     itemid.pack()
-    tkinter.Button(ws, text="Search", height="2", width="30",
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
+    tkinter.Button(ws, text="Search", height="2", width="20",
                    relief=tkinter.SOLID, command=lambda: search_item(itemid.get(), adminID)).pack()
     tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Button(text="Back to Admin Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("adminHomePage", adminID)).pack()
+                   relief=tkinter.SOLID, command=lambda: changepage("adminHomePage", adminID)).pack(side=tkinter.BOTTOM)
     return 
 
 def AdminSearchForOnePage(root, cursor, itemID, adminID):
@@ -912,39 +916,16 @@ def AdminSearchForOnePage(root, cursor, itemID, adminID):
         tree.insert("", "end", values=values)   
 
     tkinter.Button(text="Back", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                cursor='hand2', command= lambda: AdminSearchAllOrOnePage(root, cursor, adminID)).pack(side=tkinter.TOP)
+                cursor='hand2', command= lambda: AdminSearchAllOrOnePage(root, cursor, adminID)).pack(side=tkinter.BOTTOM)
 
 def AdminSearchAllPage(root, cursor, adminID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.title('Choose a category!')
-    ws.wm_geometry("1040x900")
+    ws.title('Admin - Filter!')
+    ws.wm_geometry("1040x700")
     ws.config(bg='#add8e6')
-    '''# Category
-    categories = [default_category, "Lights", "Locks"]
-    category = tkinter.StringVar()
-    category.set(categories[0])
-    dropcat = tkinter.OptionMenu(root, category, *categories)
-    dropcat.pack()
-
-    # Model
-    tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Select Light model:", bg='#add8e6').pack()
-
-    lights = [default_category, "Light1", "Light2", "SmartHome1"]
-    light = tkinter.StringVar()
-    light.set(lights[0])
-    droplight = tkinter.OptionMenu(root, light, *lights)
-    droplight.pack()
-
-    tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Select Lock model:", bg='#add8e6').pack()
-    locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
-    lock = tkinter.StringVar()
-    lock.set(locks[0])
-    droplock = tkinter.OptionMenu(root, lock, *locks)
-    droplock.pack()'''
+    tkinter.Label(text="Normal Filter Options:", font =('Helvetica 14 bold'), bg='#add8e6').pack()
 
     # Category
 
@@ -987,10 +968,11 @@ def AdminSearchAllPage(root, cursor, adminID):
     #dropmodels.place(x=130, y=150)
 
     # Advanced options
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Label(text="Advanced Filter Options:", font =('Helvetica 14 bold'), bg='#add8e6').pack()
 
     # Colour
-
-    tkinter.Label(text="", bg='#add8e6').pack()
+    
     tkinter.Label(text="Select Color:", bg='#add8e6').pack()
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black"]
@@ -1049,15 +1031,14 @@ def AdminSearchAllPage(root, cursor, adminID):
         }
 
     tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="", bg='#add8e6').pack()
 
-    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
+    tkinter.Button(text="SEARCH", height="2", width="30", relief=tkinter.SOLID,
                    command=lambda: AdminSimpleSearchResult(root, cursor, category.get(), (models.get() if category.get() == "Lights" else models.get()), advanced_options, adminID) 
-                   ).pack()
+                   ).place(x=380,y=660)
                    ##if areThereSearchResults() else messagebox.showinfo('No search results!')
     tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Button(text="Back", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command= lambda: AdminSearchAllOrOnePage(root, cursor, adminID)).pack(side=tkinter.TOP)
+    tkinter.Button(text="Back", height="2", width="12", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command= lambda: AdminSearchAllOrOnePage(root, cursor, adminID)).place(x=2,y=660)
     return
 
 def AdminSimpleSearchResult(root, cursor, cat, mod, advanced_options, adminID):
@@ -1157,9 +1138,25 @@ def AdminSimpleSearchResult(root, cursor, cat, mod, advanced_options, adminID):
 
     tkinter.Label(text="Number of sold items: " +
                     str(item_sold_count), bg='#FFFFFF').grid(row=3, column=0)
-
-    tkinter.Button(text="Back to search", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: AdminSearchAllOrOnePage(root, cursor, adminID)).grid(row=4, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=5, column=0)                
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=15, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=17, column=0)
+    tkinter.Button(text="Back to Filter Options", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+               cursor='hand2', command=lambda: AdminSearchAllPage(root, cursor, adminID)).grid(row=18, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=19, column=0) 
+    tkinter.Button(text="Back to Admin Home Page", height="2", width="30", bg="#e6d8ad",
+                   relief=tkinter.SOLID, command=lambda: changepage("adminHomePage", adminID)).grid(row=20, column=0)                
     return
 
 def InventoryHomePage(root, mycursor, adminID):
@@ -1187,7 +1184,7 @@ def InventoryHomePage(root, mycursor, adminID):
 
     tkinter.Label(text = "", width = 15, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=0, column=0)
 
-    tkinter.Label(text="Products by model", width=30, height="2",
+    tkinter.Label(text="Products by Model", width=30, height="2",
                   font=("Calibri", 13)).grid(row=0, column=1)
 
     style = ttk.Style()
@@ -1195,7 +1192,7 @@ def InventoryHomePage(root, mycursor, adminID):
     tree = ttk.Treeview(columns=(
         'Category','Model', 'Number of SOLD items', 'Number of UNSOLD items'), show='headings')
 
-    root.title('Inventory')
+    root.title('Admin - Inventory')
     tree.column("#1", anchor=CENTER, width=195)
     tree.heading('#1', text='Category')
     tree.column("#2", anchor=CENTER, width=195)
@@ -1225,8 +1222,9 @@ def InventoryHomePage(root, mycursor, adminID):
     myresult2 = mycursor.fetchall()
 
     tkinter.Label(text = "", width = 15, height = 2, font=("Calibri", 13), bg = '#e6bbad').grid(row=3, column=0)
-    tkinter.Label(text="Products by category", width=30, height="2",
-                  font=("Calibri", 13)).grid(row=3, column=1)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=4, column=0)   
+    tkinter.Label(text="Products by Category", width=30, height="2",
+                  font=("Calibri", 13)).grid(row=5, column=1)
 
     style = ttk.Style()
     style.theme_use('default')
@@ -1249,14 +1247,19 @@ def InventoryHomePage(root, mycursor, adminID):
             y[2] = 0
         x = tuple(y)
         tree.insert("", "end", values=x)
-    tree.grid(row=4, column=1)
+    tree.grid(row=6, column=1)
 
     scrollbar = ttk.Scrollbar(root, orient=tkinter.VERTICAL)
     tree.configure(yscroll=scrollbar.set)
-    scrollbar.grid(row=4, column=2, sticky="ns")
+    scrollbar.grid(row=6, column=2, sticky="ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=5, column=1)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=7, column=0)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=8, column=0)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=9, column=0)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=10, column=0)
+
+    tkinter.Button(text="Back to Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=11, column=1)
 
 
 
@@ -1297,8 +1300,9 @@ def ServiceStatusesPage(root, mycursor, adminID):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=2, sticky="ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="25", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=1)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=2, column=0)                
+    tkinter.Button(text="Back to Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=3, column=1)
 
 
 def UnpaidHomePage(root, mycursor, adminID):
@@ -1337,8 +1341,9 @@ def UnpaidHomePage(root, mycursor, adminID):
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=2, sticky="ns")
 
-    tkinter.Button(text="Back to Admin", height="2", width="20", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=2, column=1)
+    tkinter.Label(text="", bg='#e6bbad').grid(row=2, column=0)  
+    tkinter.Button(text="Back to Admin Home Page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+                   cursor='hand2', command=lambda: changepage("adminHomePage", adminID)).grid(row=3, column=1)
 
 
 def CustomerHomePage(root, cursor, customerID):
@@ -1476,6 +1481,7 @@ def ApproveHomePage(root, cursor, adminID):
     else:
         for i in table_info:
             tree.insert("", "end", values=i)
+        tkinter.Label(text="", bg='#e6bbad').pack()  
         tkinter.Button(text="Approve Selected Requests", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
             'Calibri', 20),  relief=tkinter.SOLID, command=lambda: approve_selected(tree.selection())).pack()
 
@@ -1538,6 +1544,7 @@ def ServiceItemsPage(root, cursor, adminID):
     else:
         for i in table_info:
             tree.insert("", "end", values=i)
+        tkinter.Label(text="", bg='#e6bbad').pack()    
         tkinter.Button(text="Service Selected Items", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
             'Calibri', 20),  relief=tkinter.SOLID, command=lambda: service_selected(tree.selection())).pack()
 
@@ -1569,26 +1576,30 @@ def CustomerBuySearch(root, cursor, currCustomerID):
                         title="Item purchased!", message="Thank you for your purchase!\nItem bought: " + itemID)
 
     ws = root
-    ws.title('Customer - Home')
+    ws.title('Customer - Search/Buy')
     ws.config(bg='#add8e6')
-    tkinter.Label(ws, text="Welcome " + customerName + " [ID:" + str(
+    tkinter.Label(ws, text="Welcome, [CustomerID: " + str(
         currCustomerID) + "]", width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Button(ws, text="Search and Buy items", height="2", width="30",
                    relief=tkinter.SOLID, command=lambda: changepage("SearchPage", currCustomerID)).pack()
     tkinter.Label(ws, text="", bg='#add8e6').pack()
-    tkinter.Label(ws, text="To buy, please enter Item ID",
+    tkinter.Label(ws, text="", bg='#add8e6').pack()               
+    tkinter.Label(ws, text="If you wish to buy a specific item, please enter Item ID below:",
                   width="300", height="2", font=("Calibri", 13)).pack()
+    tkinter.Label(ws, text="", bg='#add8e6').pack()                             
     # for buy entry
     f = ('Times', 14)
     tkinter.Label(ws, text="Enter item ID here", bg='#CCCCCC', font=f)
     itemid = tkinter.Entry(ws, font=f)
     itemid.pack()
-    tkinter.Button(ws, text="Buy", height="2", width="30",
+    tkinter.Label(text="", bg='#add8e6').pack()
+    tkinter.Button(ws, text="Buy", height="2", width="20",
                    relief=tkinter.SOLID, command=lambda: buy_item(itemid.get())).pack()
     tkinter.Label(ws, text="", bg='#add8e6').pack()
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", currCustomerID)).pack()
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", currCustomerID)).pack(side=tkinter.BOTTOM)
     return
 
 
@@ -1596,32 +1607,12 @@ def SearchPage(root, cursor, customerID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.title('Choose a category!')
-    ws.wm_geometry("1040x900")
+    ws.title('Customer - Filter')
+    ws.wm_geometry("1040x700")
     ws.config(bg='#add8e6')
     
-    '''# Category
-    categories = [default_category, "Lights", "Locks"]
-    category = tkinter.StringVar()
-    category.set(categories[0])
-    dropcat = tkinter.OptionMenu(root, category, *categories)
-    dropcat.pack()
-
-    tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Select Light model:", bg='#add8e6').pack()
-    # Model
-    lights = [default_category, "Light1", "Light2", "SmartHome1"]
-    light = tkinter.StringVar()
-    light.set(lights[0])
-    droplight = tkinter.OptionMenu(root, light, *lights)
-    droplight.pack()
-    tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Select Lock model:", bg='#add8e6').pack()
-    locks = [default_category, "Safe1", "Safe2", "Safe3", "SmartHome1"]
-    lock = tkinter.StringVar()
-    lock.set(locks[0])
-    droplock = tkinter.OptionMenu(root, lock, *locks)
-    droplock.pack()'''
+    # Normal Options
+    tkinter.Label(text="Normal Filter Options:", font =('Helvetica 14 bold'), bg='#add8e6').pack()
 
     # Category
     tkinter.Label(text="Select Category:", bg='#add8e6').pack()
@@ -1664,13 +1655,13 @@ def SearchPage(root, cursor, customerID):
 
 
     tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Label(text="Advanced Filter Options:", bg='#add8e6').pack()
+    tkinter.Label(text="Advanced Filter Options:", font =('Helvetica 14 bold'), bg='#add8e6').pack()
 
     # Advanced options
 
     # Colour
 
-    tkinter.Label(text="", bg='#add8e6').pack()
+    # tkinter.Label(text="", bg='#add8e6').pack()
     tkinter.Label(text="Select Color:", bg='#add8e6').pack()
     colors = [default_category, "White", "Blue",
               "Yellow", "Green", "Black"]
@@ -1760,13 +1751,12 @@ def SearchPage(root, cursor, customerID):
         if item_count == 0:
             return False
         return True
-    tkinter.Button(text="Search", height="2", width="30", relief=tkinter.SOLID,
+    tkinter.Button(text="SEARCH", height="2", width="30", relief=tkinter.SOLID,
                    command=lambda: SimpleSearchResult(root, cursor, category.get(), (models.get() if category.get() == "Lights" else models.get()), advanced_options, customerID) 
-                   ).pack()
+                   ).place(x=380,y=660)
                    ##if areThereSearchResults() else messagebox.showinfo('No search results!')
-    tkinter.Label(text="", bg='#add8e6').pack()
-    tkinter.Button(text="Back to Buy/Search page", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).pack(side=tkinter.TOP)
+    tkinter.Button(text="Back", height="2", width="12", bg="#e6d8ad", relief=tkinter.SOLID, 
+                   cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).place(x = 2, y =660)
     return
 
 
@@ -1774,7 +1764,7 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
     for widget in root.winfo_children():
         widget.destroy()
     ws = root
-    ws.title('Search results')
+    ws.title('Customer -Search Results')
     ws.config(bg='#add8e6')
     f = ('Calibri', 13)
 
@@ -1888,16 +1878,32 @@ def SimpleSearchResult(root, cursor, cat, mod, advanced_options, customerID):
         tkinter.Label(text="Number of items in stock: " +
                       str(item_count), bg='#FFFFFF').grid(row=3, column=0)
 
-    tkinter.Button(text="Back to search", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: SearchPage(root, cursor, customerID)).grid(row=4, column=0)
-    tkinter.Button(text="Back to buy/search page", height="2", width="50", bg="#b5f09d", relief=tkinter.SOLID,
-                   cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).grid(row=5, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=0)
     tkinter.Button(text="BUY SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: buy_selected(tree.selection(), customerID)).grid(row=6, column=0)
+                'Calibri', 20),  relief=tkinter.SOLID, command=lambda: buy_selected(tree.selection(), customerID)).grid(row=5, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=15, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=0)
+    tkinter.Button(text="Back to Filter Options", height="2", width="30", bg="#e6d8ad", relief=tkinter.SOLID,
+               cursor='hand2', command=lambda: SearchPage(root, cursor, customerID)).grid(row=17, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=18, column=0) 
+    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=19, column=0)
+    # don't need 
+    # tkinter.Button(text="Back to buy/search page", height="2", width="50", bg="#b5f09d", relief=tkinter.SOLID,
+    #               cursor='hand2', command=lambda: CustomerBuySearch(root, cursor, customerID)).grid(row=9, column=0)       
 
 
 def CustomerAllRequestsPage(root, cursor, customerID):
-    root.title("Customer Request Page")
+    root.title("Customer - My Requests")
     f = ('Calibri', 13)
     tkinter.Label(text = "", width = 40, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
     tkinter.Label(text="All my Requests :)", width = 30,
@@ -1923,13 +1929,30 @@ def CustomerAllRequestsPage(root, cursor, customerID):
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=2, sticky='ns')
+    tkinter.Label(text="", bg='#add8e6').grid(row=2, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=3, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=5, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=15, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=17, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=18, column=1)
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=19, column=1)
     return
 
 
 def CustomerCancelRequestPage(root, cursor, customerID):
-    root.title("Customer Request Page")
+    root.title("Customer - Canceling a Request")
     f = ('Calibri', 13)
     tkinter.Label(text = "", width = 30, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
 
@@ -1963,10 +1986,25 @@ def CustomerCancelRequestPage(root, cursor, customerID):
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=2, sticky='ns')
+    tkinter.Label(text="", bg='#add8e6').grid(row=2, column=1)
     tkinter.Button(text="CANCEL SELECTED REQUESTS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: cancel_selected(tree.selection(), customerID)).grid(row=2, column=1)
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: cancel_selected(tree.selection(), customerID)).grid(row=3, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=5, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=15, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=17, column=1)
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=18, column=1)
     
     def cancel_selected(selected_items, customerID):
         cancel_info = []
@@ -1986,7 +2024,7 @@ def CustomerCancelRequestPage(root, cursor, customerID):
 
 
 def CustomerRequestPage(root, cursor, customerID):
-    root.title("Customer Request Page")
+    root.title("Customer - Making a Request")
     f = ('Calibri', 13)
     tkinter.Label(text = "", width = 25, height = 2, font=("Calibri", 13), bg = '#add8e6').grid(row=0, column=0)
     tkinter.Label(text="Items that I can make Requests for :)",
@@ -2024,10 +2062,26 @@ def CustomerRequestPage(root, cursor, customerID):
         root, orient=tkinter.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=1, column=2, sticky='ns')
-    tkinter.Button(text="REQUEST SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: req_selected(tree.selection(), customerID)).grid(row=2, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=2, column=1)
+    tkinter.Button(text="REQUEST SERVICE FOR SELECTED ITEMS", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: req_selected(tree.selection(), customerID)).grid(row=3, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=5, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=17, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=18, column=1)
     tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=3, column=1)
+                   relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=19, column=1)
     
     def req_selected(selected_items, customerID):
         req_info = []
@@ -2143,7 +2197,7 @@ def CustomerItemsPage(root, cursor, customerID):
         for item in table_info:
             tree.insert("", "end", values=item)
 
-    root.title('Customer Items Page')
+    root.title('Customer - All My Purchased Items')
     #tree.column('#1', anchor=CENTER, width='100')
     #tree.heading('#1', text='Item ID')
     #tree.column('#2', anchor=CENTER, width='100')
@@ -2169,7 +2223,7 @@ def CustomerItemsPage(root, cursor, customerID):
 def CustomerPayRequests(root, cursor, customerID):
     # Page to view, select and pay for requests submitted by customer which requires payment
     ws = root
-    ws.title('Pay for submitted requests')
+    ws.title('Customer - Pay for Submitted Requests')
     ws.config(bg='#add8e6')
     f = ('Calibri', 13)
 
@@ -2239,11 +2293,27 @@ def CustomerPayRequests(root, cursor, customerID):
             messagebox.showinfo(
                 title="Requests paid", message="Requests successfully paid. Thank you!")
             changepage('payServiceHomePage', customerID)
-
-    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
-                relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=6, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=2, column=1)
     tkinter.Button(text="PAY SELECTED REQUEST", height="2", width="30", bg="#91d521", fg="#FFFFFF", font=(
-        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=5, column=0)
+        'Calibri', 20),  relief=tkinter.SOLID, command=lambda: pay_selected(tree.selection())).grid(row=3, column=0)
+    tkinter.Label(text="", bg='#add8e6').grid(row=4, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=5, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=6, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=7, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=8, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=9, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=10, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=11, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=12, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=13, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=14, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=16, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=17, column=1)
+    tkinter.Label(text="", bg='#add8e6').grid(row=18, column=1)
+    tkinter.Button(text="Back to Customer Home Page", height="2", width="30", bg="#e6d8ad",
+                relief=tkinter.SOLID, command=lambda: changepage("customerHomePage", customerID)).grid(row=19, column=1)
+
 
 
 def cancelInvalidRequests():
@@ -2393,7 +2463,7 @@ customerID = ""
 # Connect MYSQL
 MYSQL_HOST = "localhost"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"  # your pw here since everyone got diff pw
+MYSQL_PASSWORD = "s9935327i"  # your pw here since everyone got diff pw
 MYSQL_DATABASE = "oshes"
 
 mydb = mysql.connector.connect(
@@ -2402,7 +2472,7 @@ mycursor = mydb.cursor(buffered=True)
 
 # Connect MongoDB
 client = MongoClient()
-mongo = client['testdb']  # the name of your mongodb database here
+mongo = client['Inventory']  # the name of your mongodb database here
 items = mongo.items
 products = mongo.products
 
